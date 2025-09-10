@@ -42,7 +42,6 @@ struct DraggableHandle: View {
         let x = center.x + radius * cos(angle)
         let y = center.y + radius * sin(angle)
         let position = CGPoint(x: x, y: y)
-        print("🎯 Debug - Handle position: \(position), angle: \(angle), progress: \(setTimeProgress), center: \(center), geometry: \(geometry.size)")
         return position
     }
     
