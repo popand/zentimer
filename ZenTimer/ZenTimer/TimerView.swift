@@ -18,7 +18,7 @@ struct TimerView: View {
                 )
                 .ignoresSafeArea()
                 
-                VStack(spacing: 48) {
+                VStack(spacing: 32) {
                     // Timer Circle Container - Fixed center positioning
                     GeometryReader { timerGeometry in
                         ZStack {
@@ -60,6 +60,9 @@ struct TimerView: View {
                     
                     // Control Buttons
                     ControlButtons(viewModel: viewModel)
+                    
+                    // Notification Options
+                    NotificationButtons(viewModel: viewModel)
                 }
             }
         }

@@ -1,5 +1,8 @@
 import SwiftUI
 import Combine
+import AVFoundation
+import UserNotifications
+import AudioToolbox
 
 class TimerViewModel: ObservableObject {
     @Published var minutes: Int = 25
@@ -8,6 +11,12 @@ class TimerViewModel: ObservableObject {
     @Published var isRunning: Bool = false
     @Published var isDragging: Bool = false
     @Published var dragProgress: Double? = nil
+    
+    // Notification preferences
+    @Published var flashEnabled: Bool = false
+    @Published var vibrationEnabled: Bool = true
+    @Published var soundEnabled: Bool = false
+    @Published var doNotDisturbEnabled: Bool = false
     
     private var timer: Timer?
     
@@ -90,9 +99,7 @@ class TimerViewModel: ObservableObject {
             } else {
                 self.stopTimer()
                 self.isRunning = false
-                // Add completion haptic feedback
-                let impactFeedback = UIImpactFeedbackGenerator(style: .heavy)
-                impactFeedback.impactOccurred()
+                self.triggerNotifications()
             }
         }
     }
@@ -100,6 +107,100 @@ class TimerViewModel: ObservableObject {
     private func stopTimer() {
         timer?.invalidate()
         timer = nil
+    }
+    
+    // MARK: - Notification Methods
+    
+    private func triggerNotifications() {
+        if vibrationEnabled {
+            triggerCalmingVibration()
+        }
+        
+        if flashEnabled {
+            triggerFlash()
+        }
+        
+        if soundEnabled {
+            triggerCalmingSound()
+        }
+    }
+    
+    private func triggerCalmingVibration() {
+        // Gentle, calming vibration pattern
+        DispatchQueue.main.async {
+            let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+            impactFeedback.prepare()
+            
+            // Create a gentle triple pulse pattern
+            impactFeedback.impactOccurred()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                impactFeedback.impactOccurred()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    impactFeedback.impactOccurred()
+                }
+            }
+        }
+    }
+    
+    private func triggerFlash() {
+        guard let device = AVCaptureDevice.default(for: .video),
+              device.hasTorch else { return }
+        
+        DispatchQueue.main.async {
+            do {
+                try device.lockForConfiguration()
+                
+                // Create a gentle flash pattern
+                for i in 0..<3 {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * 0.4) {
+                        do {
+                            try device.setTorchModeOn(level: 0.5)
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                                device.torchMode = .off
+                            }
+                        } catch {
+                            print("Flash error: \(error)")
+                        }
+                    }
+                }
+                
+                device.unlockForConfiguration()
+            } catch {
+                print("Could not configure flash: \(error)")
+            }
+        }
+    }
+    
+    private func triggerCalmingSound() {
+        // Play a very gentle, low chime sound
+        DispatchQueue.main.async {
+            AudioServicesPlaySystemSound(1016) // Low power chime
+        }
+    }
+    
+    func toggleFlash() {
+        flashEnabled.toggle()
+    }
+    
+    func toggleVibration() {
+        vibrationEnabled.toggle()
+    }
+    
+    func toggleSound() {
+        soundEnabled.toggle()
+    }
+    
+    func toggleDoNotDisturb() {
+        doNotDisturbEnabled.toggle()
+        if doNotDisturbEnabled && isRunning {
+            enableDoNotDisturb()
+        }
+    }
+    
+    private func enableDoNotDisturb() {
+        // This would typically integrate with Focus/Do Not Disturb APIs
+        // For now, we'll just track the state
+        print("Do Not Disturb mode enabled")
     }
     
     deinit {
