@@ -57,9 +57,6 @@ struct TimerView: View {
                     .frame(width: 320, height: 320)
                     .padding(.horizontal, 40)
                     
-                    // Time Adjustment Controls
-                    TimeAdjustmentControls(viewModel: viewModel)
-                    
                     // Control Buttons
                     ControlButtons(viewModel: viewModel)
                 }
