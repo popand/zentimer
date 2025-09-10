@@ -1,0 +1,85 @@
+# Xcode
+#
+# gitignore contributors: remember to update Global/Xcode.gitignore, Objective-C.gitignore & Swift.gitignore
+
+## User settings
+xcuserdata/
+
+## Compatibility with Xcode 8 and earlier (ignoring not required starting Xcode 9)
+*.xcscmblueprint
+*.xccheckout
+
+## compatibility with Xcode 9 and later (ignoring not required starting Xcode 10)
+*.xcuserstate
+
+## Xcode Patch
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+!*.xcodeproj/project.xcworkspace/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+
+# SwiftUI Previews
+*.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
+
+## Gcc Patch
+/*.gcno
+
+# Build Products
+build/
+DerivedData/
+*.app
+
+# Various settings
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+
+## Other
+*.moved-aside
+*.xcuserstate
+
+## Obj-C/Swift specific
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# CocoaPods
+Pods/
+*.xcworkspace
+
+# Carthage
+Carthage/Checkouts
+Carthage/Build
+
+# SPM
+.swiftpm/
+
+# Xcode automatically generates this directory with a .gitkeep file
+.swiftpm/xcode/package.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
+.swiftpm/xcode/package.xcworkspace/xcuserdata
+
+# fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# Code Injection
+iOSInjectionProject/
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Project-specific ignores
+.claude/
+CLAUDE.md
+PRD.md
+zentime-timer-app.tsx
