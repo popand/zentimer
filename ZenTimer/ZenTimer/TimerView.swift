@@ -63,6 +63,10 @@ struct TimerView: View {
                     
                     // Notification Options
                     NotificationButtons(viewModel: viewModel)
+                    
+                    // Notification Message (appears temporarily)
+                    NotificationMessage(viewModel: viewModel)
+                        .padding(.top, 16)
                 }
             }
         }

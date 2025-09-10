@@ -46,6 +46,36 @@ struct ControlButtons: View {
     }
 }
 
+struct NotificationMessage: View {
+    @ObservedObject var viewModel: TimerViewModel
+    
+    var body: some View {
+        if viewModel.showNotificationMessage {
+            Text(viewModel.notificationMessage)
+                .font(.system(size: 14, weight: .light))
+                .foregroundColor(.white.opacity(0.9))
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 12)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(.white.opacity(0.15))
+                        .background(.ultraThinMaterial)
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(.white.opacity(0.2), lineWidth: 1)
+                )
+                .transition(.asymmetric(
+                    insertion: .opacity.combined(with: .move(edge: .bottom)),
+                    removal: .opacity.combined(with: .move(edge: .bottom))
+                ))
+                .animation(.easeOut(duration: 0.3), value: viewModel.showNotificationMessage)
+        }
+    }
+}
+
 struct NotificationButtons: View {
     @ObservedObject var viewModel: TimerViewModel
     

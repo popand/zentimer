@@ -19,7 +19,12 @@ class TimerViewModel: ObservableObject {
     @Published var soundEnabled: Bool = false
     @Published var doNotDisturbEnabled: Bool = false
     
+    // Notification message state
+    @Published var showNotificationMessage: Bool = false
+    @Published var notificationMessage: String = ""
+    
     private var timer: Timer?
+    private var messageTimer: Timer?
     
     var progress: Double {
         guard totalSeconds > 0 else { return 1.0 }
@@ -110,30 +115,58 @@ class TimerViewModel: ObservableObject {
         timer = nil
     }
     
+    private func showTemporaryMessage(_ message: String, duration: TimeInterval = 3.0) {
+        notificationMessage = message
+        showNotificationMessage = true
+        
+        messageTimer?.invalidate()
+        messageTimer = Timer.scheduledTimer(withTimeInterval: duration, repeats: false) { [weak self] _ in
+            DispatchQueue.main.async {
+                self?.showNotificationMessage = false
+                self?.notificationMessage = ""
+            }
+        }
+    }
+    
     // MARK: - Notification Methods
     
     private func triggerNotifications() {
         // Check if we should trigger notifications based on Do Not Disturb settings
         if !shouldTriggerNotifications() {
+            print("🔕 Do Not Disturb active - limited notifications:")
             // In Do Not Disturb mode, only trigger the most gentle notification
             if vibrationEnabled {
+                print("  📳 Triggering gentle vibration (DND mode)")
                 triggerCalmingVibration()
+            } else {
+                print("  📳 Vibration skipped (disabled)")
             }
-            print("🔕 Do Not Disturb active - only vibration allowed")
+            print("  📸 Flash suppressed (DND mode)")
+            print("  🔊 Sound suppressed (DND mode)")
             return
         }
         
         // Normal notification behavior
+        print("🔔 Timer completed - triggering enabled notifications:")
         if vibrationEnabled {
+            print("  📳 Triggering vibration")
             triggerCalmingVibration()
+        } else {
+            print("  📳 Vibration skipped (disabled)")
         }
         
         if flashEnabled {
+            print("  📸 Triggering flash")
             triggerFlash()
+        } else {
+            print("  📸 Flash skipped (disabled)")
         }
         
         if soundEnabled {
+            print("  🔊 Triggering sound")
             triggerCalmingSound()
+        } else {
+            print("  🔊 Sound skipped (disabled)")
         }
     }
     
@@ -200,20 +233,25 @@ class TimerViewModel: ObservableObject {
     
     func toggleFlash() {
         flashEnabled.toggle()
+        print("📸 Flash notification: \(flashEnabled ? "ENABLED" : "DISABLED")")
     }
     
     func toggleVibration() {
         vibrationEnabled.toggle()
+        print("📳 Vibration notification: \(vibrationEnabled ? "ENABLED" : "DISABLED")")
     }
     
     func toggleSound() {
         soundEnabled.toggle()
+        print("🔊 Sound notification: \(soundEnabled ? "ENABLED" : "DISABLED")")
     }
     
     func toggleDoNotDisturb() {
         doNotDisturbEnabled.toggle()
+        print("🔕 Do Not Disturb mode: \(doNotDisturbEnabled ? "ENABLED" : "DISABLED")")
         if doNotDisturbEnabled {
             enableDoNotDisturbFeatures()
+            showTemporaryMessage("Do Not Disturb enabled. Only vibration will be active - flash and sound are suppressed.")
         } else {
             disableDoNotDisturbFeatures()
         }
@@ -290,5 +328,6 @@ class TimerViewModel: ObservableObject {
     
     deinit {
         stopTimer()
+        messageTimer?.invalidate()
     }
 }
