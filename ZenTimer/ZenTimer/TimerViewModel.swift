@@ -147,27 +147,35 @@ class TimerViewModel: ObservableObject {
               device.hasTorch else { return }
         
         DispatchQueue.main.async {
-            do {
-                try device.lockForConfiguration()
-                
-                // Create a gentle flash pattern
-                for i in 0..<3 {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * 0.4) {
-                        do {
-                            try device.setTorchModeOn(level: 0.5)
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-                                device.torchMode = .off
-                            }
-                        } catch {
-                            print("Flash error: \(error)")
-                        }
-                    }
+            self.performFlashSequence(device: device, flashCount: 0)
+        }
+    }
+    
+    private func performFlashSequence(device: AVCaptureDevice, flashCount: Int) {
+        guard flashCount < 3 else { return }
+        
+        do {
+            try device.lockForConfiguration()
+            try device.setTorchModeOn(level: 0.5)
+            device.unlockForConfiguration()
+            
+            // Turn off after 150ms
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                do {
+                    try device.lockForConfiguration()
+                    device.torchMode = .off
+                    device.unlockForConfiguration()
+                } catch {
+                    print("Flash off error: \(error)")
                 }
                 
-                device.unlockForConfiguration()
-            } catch {
-                print("Could not configure flash: \(error)")
+                // Schedule next flash after 400ms total interval
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+                    self.performFlashSequence(device: device, flashCount: flashCount + 1)
+                }
             }
+        } catch {
+            print("Flash error: \(error)")
         }
     }
     
