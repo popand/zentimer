@@ -32,7 +32,7 @@ struct CircularProgressView: View {
 struct DraggableHandle: View {
     let progress: Double
     let setTimeProgress: Double  // Progress based on set time, not remaining time
-    let radius: CGFloat = 150
+    let radius: CGFloat = 140    // Match CircularProgressView radius
     let isDragging: Bool
     
     var handlePosition: CGPoint {
@@ -44,18 +44,34 @@ struct DraggableHandle: View {
     }
     
     var body: some View {
-        Circle()
-            .fill(Color.white)
-            .frame(width: 20, height: 20)
-            .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
-            .scaleEffect(isDragging ? 1.3 : 1.0)
-            .position(
-                x: 160 + handlePosition.x,
-                y: 160 + handlePosition.y
-            )
-            .animation(
-                isDragging ? .none : .easeOut(duration: 0.2),
-                value: isDragging
-            )
+        GeometryReader { geometry in
+            let center = CGPoint(x: geometry.size.width / 2, y: geometry.size.height / 2)
+            
+            ZStack {
+                // Larger invisible touch target for better touch detection
+                Circle()
+                    .fill(Color.clear)
+                    .frame(width: 44, height: 44) // Standard iOS touch target size
+                    .position(
+                        x: center.x + handlePosition.x,
+                        y: center.y + handlePosition.y
+                    )
+                
+                // Visible handle
+                Circle()
+                    .fill(Color.white)
+                    .frame(width: 20, height: 20)
+                    .shadow(color: .black.opacity(0.3), radius: 4, x: 0, y: 2)
+                    .scaleEffect(isDragging ? 1.3 : 1.0)
+                    .position(
+                        x: center.x + handlePosition.x,
+                        y: center.y + handlePosition.y
+                    )
+                    .animation(
+                        isDragging ? .none : .easeOut(duration: 0.2),
+                        value: isDragging
+                    )
+            }
+        }
     }
 }
