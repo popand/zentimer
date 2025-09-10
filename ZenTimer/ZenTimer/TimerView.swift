@@ -19,20 +19,20 @@ struct TimerView: View {
                 .ignoresSafeArea()
                 
                 VStack(spacing: 48) {
-                    // Timer Circle Container
+                    // Timer Circle Container - Fixed center positioning
                     GeometryReader { timerGeometry in
                         ZStack {
                             // Circular Progress
                             CircularProgressView(progress: viewModel.progress)
                             
-                            // Draggable Handle
-                            if !viewModel.isRunning {
-                                DraggableHandle(
-                                    progress: viewModel.progress,
-                                    setTimeProgress: viewModel.setTimeProgress,
-                                    isDragging: viewModel.isDragging
-                                )
-                            }
+                            // Draggable Handle - Always present but hidden when running
+                            DraggableHandle(
+                                progress: viewModel.progress,
+                                setTimeProgress: viewModel.setTimeProgress,
+                                isDragging: viewModel.isDragging
+                            )
+                            .opacity(viewModel.isRunning ? 0 : 1)
+                            .allowsHitTesting(!viewModel.isRunning)
                             
                             // Time Display in Center
                             VStack(spacing: 8) {
@@ -47,6 +47,8 @@ struct TimerView: View {
                                     .foregroundColor(.white.opacity(0.8))
                             }
                         }
+                        .frame(width: timerGeometry.size.width, height: timerGeometry.size.height)
+                        .position(x: timerGeometry.size.width / 2, y: timerGeometry.size.height / 2)
                         .gesture(
                             DragGestureHandler.createDragGesture(
                                 viewModel: viewModel,
@@ -55,7 +57,6 @@ struct TimerView: View {
                         )
                     }
                     .frame(width: 320, height: 320)
-                    .padding(.horizontal, 40)
                     
                     // Control Buttons
                     ControlButtons(viewModel: viewModel)
