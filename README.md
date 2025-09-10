@@ -39,19 +39,26 @@ A minimalist, elegant timer application for iOS built with SwiftUI, inspired by 
 2. Select your target device or simulator
 3. Build and run the project (⌘R)
 
-## File Structure
+## Repository Structure
 
 ```
-ZenTimer/
-├── ZenTimer.xcodeproj/        # Xcode project file
-└── ZenTimer/                  # Source code directory
-    ├── ZenTimerApp.swift          # App entry point
-    ├── ContentView.swift          # Main content wrapper
-    ├── TimerView.swift           # Primary timer interface
-    ├── TimerViewModel.swift      # Business logic and state management
-    ├── CircularProgressView.swift # Custom progress shapes and handle
-    ├── ControlButtons.swift      # UI controls and adjustments
-    └── DragGestureHandler.swift  # Gesture coordinate calculations
+zentimer/
+├── .gitignore                     # Git ignore patterns
+├── README.md                      # Project documentation
+└── ZenTimer/                      # iOS project directory
+    ├── ZenTimer.xcodeproj/        # Xcode project file
+    └── ZenTimer/                  # Source code
+        ├── ZenTimerApp.swift          # App entry point
+        ├── ContentView.swift          # Main content wrapper  
+        ├── TimerView.swift           # Primary timer interface
+        ├── TimerViewModel.swift      # Business logic and state management
+        ├── CircularProgressView.swift # Custom progress shapes and handle
+        ├── ControlButtons.swift      # UI controls and adjustments
+        ├── DragGestureHandler.swift  # Gesture coordinate calculations
+        ├── Info.plist               # App configuration
+        └── Assets.xcassets/         # App icons and resources
+            ├── AppIcon.appiconset/   # App icons (40px-1024px)
+            └── AccentColor.colorset/ # App accent color
 ```
 
 ## Requirements
