@@ -3,6 +3,7 @@ import Combine
 import AVFoundation
 import UserNotifications
 import AudioToolbox
+import Intents
 
 class TimerViewModel: ObservableObject {
     @Published var minutes: Int = 25
@@ -112,6 +113,17 @@ class TimerViewModel: ObservableObject {
     // MARK: - Notification Methods
     
     private func triggerNotifications() {
+        // Check if we should trigger notifications based on Do Not Disturb settings
+        if !shouldTriggerNotifications() {
+            // In Do Not Disturb mode, only trigger the most gentle notification
+            if vibrationEnabled {
+                triggerCalmingVibration()
+            }
+            print("🔕 Do Not Disturb active - only vibration allowed")
+            return
+        }
+        
+        // Normal notification behavior
         if vibrationEnabled {
             triggerCalmingVibration()
         }
@@ -200,15 +212,80 @@ class TimerViewModel: ObservableObject {
     
     func toggleDoNotDisturb() {
         doNotDisturbEnabled.toggle()
-        if doNotDisturbEnabled && isRunning {
-            enableDoNotDisturb()
+        if doNotDisturbEnabled {
+            enableDoNotDisturbFeatures()
+        } else {
+            disableDoNotDisturbFeatures()
         }
     }
     
-    private func enableDoNotDisturb() {
-        // This would typically integrate with Focus/Do Not Disturb APIs
-        // For now, we'll just track the state
-        print("Do Not Disturb mode enabled")
+    private func enableDoNotDisturbFeatures() {
+        // Implement app-level Do Not Disturb features
+        
+        // 1. Request notification permissions if needed
+        requestNotificationPermissions()
+        
+        // 2. Check if system Focus is already active
+        checkSystemFocusStatus()
+        
+        // 3. Suppress our app's notifications during timer
+        // 4. Provide user guidance for manual Focus setup
+        
+        print("✅ Zen Timer Do Not Disturb enabled")
+        print("💡 Tip: Enable iOS Focus mode manually for system-wide quiet time")
+    }
+    
+    private func disableDoNotDisturbFeatures() {
+        print("❌ Zen Timer Do Not Disturb disabled")
+    }
+    
+    private func requestNotificationPermissions() {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
+            DispatchQueue.main.async {
+                if granted {
+                    print("📱 Notification permissions granted")
+                } else {
+                    print("🚫 Notification permissions denied")
+                }
+            }
+        }
+    }
+    
+    private func checkSystemFocusStatus() {
+        // Check if system Focus mode is active (iOS 15+)
+        if #available(iOS 15.0, *) {
+            let focusStatus = INFocusStatusCenter.default.focusStatus
+            if focusStatus.isFocused == true {
+                print("🎯 System Focus mode is active")
+                // When system Focus is active, we can be extra quiet
+                suppressAllNotifications()
+            } else {
+                print("🎯 System Focus mode is not active")
+            }
+        }
+    }
+    
+    private func suppressAllNotifications() {
+        // Remove any pending notifications from our app
+        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+        print("🔕 All notifications suppressed")
+    }
+    
+    // Enhanced notification method that respects Do Not Disturb
+    private func shouldTriggerNotifications() -> Bool {
+        if doNotDisturbEnabled {
+            // Check if system Focus is active
+            if #available(iOS 15.0, *) {
+                let focusStatus = INFocusStatusCenter.default.focusStatus
+                if focusStatus.isFocused == true {
+                    // System Focus is active, be completely silent
+                    return false
+                }
+            }
+            // App-level DND is on, only allow vibration (most gentle)
+            return false
+        }
+        return true
     }
     
     deinit {
