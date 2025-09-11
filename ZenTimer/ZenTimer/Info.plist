@@ -37,5 +37,19 @@
 	<string>ZenTimer uses Focus status to provide enhanced Do Not Disturb functionality and respect your current focus state for a more peaceful timer experience.</string>
 	<key>NSUserNotificationsUsageDescription</key>
 	<string>ZenTimer can send gentle notifications when your timer completes. These notifications are suppressed when Do Not Disturb mode is enabled for a truly zen experience.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>ZenTimer uses camera access only for optional flash notifications when your timer completes. The camera is never used for recording or taking photos.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>background-app-refresh</string>
+		<string>background-processing</string>
+	</array>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.zentimer.background-refresh</string>
+		<string>com.zentimer.background-processing</string>
+	</array>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
 </dict>
 </plist>

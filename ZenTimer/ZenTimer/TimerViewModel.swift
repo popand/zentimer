@@ -4,6 +4,8 @@ import AVFoundation
 import UserNotifications
 import AudioToolbox
 import Intents
+import ActivityKit
+import BackgroundTasks
 
 class TimerViewModel: ObservableObject {
     @Published var minutes: Int = 25
@@ -25,6 +27,15 @@ class TimerViewModel: ObservableObject {
     
     private var timer: Timer?
     private var messageTimer: Timer?
+    private var backgroundTask: UIBackgroundTaskIdentifier = .invalid
+    
+    // Background and Live Activity support
+    private var liveActivityManager: AnyObject? {
+        if #available(iOS 16.1, *) {
+            return LiveActivityManager.shared
+        }
+        return nil
+    }
     
     var progress: Double {
         guard totalSeconds > 0 else { return 1.0 }
@@ -61,8 +72,10 @@ class TimerViewModel: ObservableObject {
         
         if isRunning {
             startTimer()
+            startLiveActivity()
         } else {
-            stopTimer()
+            pauseTimer()
+            updateLiveActivity()
         }
     }
     
@@ -70,6 +83,7 @@ class TimerViewModel: ObservableObject {
         stopTimer()
         isRunning = false
         timeLeft = totalSeconds
+        endLiveActivity()
     }
     
     func adjustMinutes(by delta: Int) {
@@ -97,15 +111,24 @@ class TimerViewModel: ObservableObject {
     }
     
     private func startTimer() {
+        startBackgroundTask()
+        
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             guard let self = self else { return }
             
             if self.timeLeft > 0 {
                 self.timeLeft -= 1
+                self.updateLiveActivity()
+                
+                // Schedule local notification for completion if we're near the end
+                if self.timeLeft <= 5 && self.timeLeft > 0 {
+                    self.scheduleCompletionNotification()
+                }
             } else {
                 self.stopTimer()
                 self.isRunning = false
                 self.triggerNotifications()
+                self.endLiveActivity()
             }
         }
     }
@@ -113,6 +136,13 @@ class TimerViewModel: ObservableObject {
     private func stopTimer() {
         timer?.invalidate()
         timer = nil
+        endBackgroundTask()
+    }
+    
+    private func pauseTimer() {
+        timer?.invalidate()
+        timer = nil
+        // Keep background task active for pause state
     }
     
     private func showTemporaryMessage(_ message: String, duration: TimeInterval = 3.0) {
@@ -326,8 +356,74 @@ class TimerViewModel: ObservableObject {
         return true
     }
     
+    // MARK: - Live Activity Methods
+    
+    private func startLiveActivity() {
+        guard #available(iOS 16.1, *) else { return }
+        print("🎬 TimerViewModel: Starting Live Activity")
+        (liveActivityManager as? LiveActivityManager)?.startLiveActivity(
+            totalTime: TimeInterval(totalSeconds),
+            remainingTime: TimeInterval(timeLeft),
+            isRunning: isRunning
+        )
+    }
+    
+    private func updateLiveActivity() {
+        guard #available(iOS 16.1, *) else { return }
+        (liveActivityManager as? LiveActivityManager)?.updateLiveActivity(
+            remainingTime: TimeInterval(timeLeft),
+            totalTime: TimeInterval(totalSeconds),
+            isRunning: isRunning
+        )
+    }
+    
+    private func endLiveActivity() {
+        guard #available(iOS 16.1, *) else { return }
+        (liveActivityManager as? LiveActivityManager)?.endLiveActivity()
+    }
+    
+    // MARK: - Background Processing
+    
+    private func startBackgroundTask() {
+        endBackgroundTask()
+        
+        backgroundTask = UIApplication.shared.beginBackgroundTask(withName: "TimerBackgroundTask") { [weak self] in
+            self?.endBackgroundTask()
+        }
+    }
+    
+    private func endBackgroundTask() {
+        if backgroundTask != .invalid {
+            UIApplication.shared.endBackgroundTask(backgroundTask)
+            backgroundTask = .invalid
+        }
+    }
+    
+    private func scheduleCompletionNotification() {
+        let content = UNMutableNotificationContent()
+        content.title = "ZenTimer"
+        content.body = "Focus session completed! Take a well-deserved break."
+        content.sound = UNNotificationSound.default
+        
+        let request = UNNotificationRequest(
+            identifier: "timer-completion",
+            content: content,
+            trigger: UNTimeIntervalNotificationTrigger(timeInterval: TimeInterval(timeLeft), repeats: false)
+        )
+        
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("Error scheduling notification: \(error)")
+            }
+        }
+    }
+    
     deinit {
         stopTimer()
         messageTimer?.invalidate()
+        endBackgroundTask()
+        if #available(iOS 16.1, *) {
+            (liveActivityManager as? LiveActivityManager)?.endLiveActivity()
+        }
     }
 }

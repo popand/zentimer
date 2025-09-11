@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -19,7 +19,36 @@
 		C99E465A2E73582500A55912 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99E46572E73582500A55912 /* SettingsView.swift */; };
 		C99E465B2E73582500A55912 /* PrivacyPolicyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99E46562E73582500A55912 /* PrivacyPolicyView.swift */; };
 		C99E465C2E73582500A55912 /* TermsOfServiceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99E46582E73582500A55912 /* TermsOfServiceView.swift */; };
+		C99E46692E7365E500A55912 /* LiveActivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99E46662E7365E500A55912 /* LiveActivityManager.swift */; };
+		C99E466A2E7365E500A55912 /* TimerLiveActivity.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99E46672E7365E500A55912 /* TimerLiveActivity.swift */; };
+		C99E46722E73732800A55912 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C99E46712E73732800A55912 /* WidgetKit.framework */; };
+		C99E46742E73732800A55912 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C99E46732E73732800A55912 /* SwiftUI.framework */; };
+		C99E46832E73732B00A55912 /* ZenTimerWidgetExtensionExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = C99E466F2E73732800A55912 /* ZenTimerWidgetExtensionExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		C99E46812E73732B00A55912 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA0000023 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C99E466E2E73732800A55912;
+			remoteInfo = ZenTimerWidgetExtensionExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		C99E46882E73732B00A55912 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				C99E46832E73732B00A55912 /* ZenTimerWidgetExtensionExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		AA0000002 /* ZenTimerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenTimerApp.swift; sourceTree = "<group>"; };
@@ -36,13 +65,41 @@
 		C99E46562E73582500A55912 /* PrivacyPolicyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPolicyView.swift; sourceTree = "<group>"; };
 		C99E46572E73582500A55912 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		C99E46582E73582500A55912 /* TermsOfServiceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TermsOfServiceView.swift; sourceTree = "<group>"; };
+		C99E46662E7365E500A55912 /* LiveActivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveActivityManager.swift; sourceTree = "<group>"; };
+		C99E46672E7365E500A55912 /* TimerLiveActivity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerLiveActivity.swift; sourceTree = "<group>"; };
+		C99E466F2E73732800A55912 /* ZenTimerWidgetExtensionExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ZenTimerWidgetExtensionExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		C99E46712E73732800A55912 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		C99E46732E73732800A55912 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		C99E46842E73732B00A55912 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = C99E466E2E73732800A55912 /* ZenTimerWidgetExtensionExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		C99E46752E73732800A55912 /* ZenTimerWidgetExtension */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (C99E46842E73732B00A55912 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = ZenTimerWidgetExtension; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		AA0000016 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C99E466C2E73732800A55912 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C99E46742E73732800A55912 /* SwiftUI.framework in Frameworks */,
+				C99E46722E73732800A55912 /* WidgetKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -60,6 +117,7 @@
 				C99E46572E73582500A55912 /* SettingsView.swift */,
 				C99E46582E73582500A55912 /* TermsOfServiceView.swift */,
 				AA0000008 /* TimerViewModel.swift */,
+				C99E46682E7365E500A55912 /* LiveActivity */,
 				AA0000010 /* CircularProgressView.swift */,
 				AA0000012 /* ControlButtons.swift */,
 				AA0000014 /* DragGestureHandler.swift */,
@@ -73,6 +131,7 @@
 			isa = PBXGroup;
 			children = (
 				AA0000015 /* ZenTimer.app */,
+				C99E466F2E73732800A55912 /* ZenTimerWidgetExtensionExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -81,8 +140,28 @@
 			isa = PBXGroup;
 			children = (
 				AA0000017 /* ZenTimer */,
+				C99E46752E73732800A55912 /* ZenTimerWidgetExtension */,
+				C99E46702E73732800A55912 /* Frameworks */,
 				AA0000018 /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		C99E46682E7365E500A55912 /* LiveActivity */ = {
+			isa = PBXGroup;
+			children = (
+				C99E46662E7365E500A55912 /* LiveActivityManager.swift */,
+				C99E46672E7365E500A55912 /* TimerLiveActivity.swift */,
+			);
+			path = LiveActivity;
+			sourceTree = "<group>";
+		};
+		C99E46702E73732800A55912 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				C99E46712E73732800A55912 /* WidgetKit.framework */,
+				C99E46732E73732800A55912 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -95,15 +174,39 @@
 				AA0000022 /* Sources */,
 				AA0000016 /* Frameworks */,
 				AA0000032 /* Resources */,
+				C99E46882E73732B00A55912 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				C99E46822E73732B00A55912 /* PBXTargetDependency */,
 			);
 			name = ZenTimer;
 			productName = ZenTimer;
 			productReference = AA0000015 /* ZenTimer.app */;
 			productType = "com.apple.product-type.application";
+		};
+		C99E466E2E73732800A55912 /* ZenTimerWidgetExtensionExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C99E46852E73732B00A55912 /* Build configuration list for PBXNativeTarget "ZenTimerWidgetExtensionExtension" */;
+			buildPhases = (
+				C99E466B2E73732800A55912 /* Sources */,
+				C99E466C2E73732800A55912 /* Frameworks */,
+				C99E466D2E73732800A55912 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				C99E46752E73732800A55912 /* ZenTimerWidgetExtension */,
+			);
+			name = ZenTimerWidgetExtensionExtension;
+			packageProductDependencies = (
+			);
+			productName = ZenTimerWidgetExtensionExtension;
+			productReference = C99E466F2E73732800A55912 /* ZenTimerWidgetExtensionExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -112,11 +215,14 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1500;
+				LastSwiftUpdateCheck = 1640;
 				LastUpgradeCheck = 1640;
 				TargetAttributes = {
 					AA0000020 = {
 						CreatedOnToolsVersion = 15.0;
+					};
+					C99E466E2E73732800A55912 = {
+						CreatedOnToolsVersion = 16.4;
 					};
 				};
 			};
@@ -134,6 +240,7 @@
 			projectRoot = "";
 			targets = (
 				AA0000020 /* ZenTimer */,
+				C99E466E2E73732800A55912 /* ZenTimerWidgetExtensionExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -144,6 +251,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				AA0000033 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C99E466D2E73732800A55912 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -162,13 +276,30 @@
 				C99E465A2E73582500A55912 /* SettingsView.swift in Sources */,
 				C99E465B2E73582500A55912 /* PrivacyPolicyView.swift in Sources */,
 				C99E465C2E73582500A55912 /* TermsOfServiceView.swift in Sources */,
+				C99E46692E7365E500A55912 /* LiveActivityManager.swift in Sources */,
+				C99E466A2E7365E500A55912 /* TimerLiveActivity.swift in Sources */,
 				AA0000009 /* CircularProgressView.swift in Sources */,
 				AA0000011 /* ControlButtons.swift in Sources */,
 				AA0000013 /* DragGestureHandler.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C99E466B2E73732800A55912 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		C99E46822E73732B00A55912 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C99E466E2E73732800A55912 /* ZenTimerWidgetExtensionExtension */;
+			targetProxy = C99E46812E73732B00A55912 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		AA0000025 /* Debug */ = {
@@ -350,6 +481,60 @@
 			};
 			name = Release;
 		};
+		C99E46862E73732B00A55912 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ZenTimerWidgetExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ZenTimerWidgetExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.zentimer.app.ZenTimerWidgetExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		C99E46872E73732B00A55912 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ZenTimerWidgetExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ZenTimerWidgetExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.zentimer.app.ZenTimerWidgetExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -367,6 +552,15 @@
 			buildConfigurations = (
 				AA0000025 /* Debug */,
 				AA0000026 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C99E46852E73732B00A55912 /* Build configuration list for PBXNativeTarget "ZenTimerWidgetExtensionExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C99E46862E73732B00A55912 /* Debug */,
+				C99E46872E73732B00A55912 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
