@@ -15,6 +15,10 @@
 		AA0000011 /* ControlButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000012 /* ControlButtons.swift */; };
 		AA0000013 /* DragGestureHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000014 /* DragGestureHandler.swift */; };
 		AA0000033 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA0000030 /* Assets.xcassets */; };
+		C99E46592E73582500A55912 /* HelpSupportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99E46552E73582500A55912 /* HelpSupportView.swift */; };
+		C99E465A2E73582500A55912 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99E46572E73582500A55912 /* SettingsView.swift */; };
+		C99E465B2E73582500A55912 /* PrivacyPolicyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99E46562E73582500A55912 /* PrivacyPolicyView.swift */; };
+		C99E465C2E73582500A55912 /* TermsOfServiceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99E46582E73582500A55912 /* TermsOfServiceView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,6 +32,10 @@
 		AA0000015 /* ZenTimer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ZenTimer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA0000030 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AA0000031 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C99E46552E73582500A55912 /* HelpSupportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpSupportView.swift; sourceTree = "<group>"; };
+		C99E46562E73582500A55912 /* PrivacyPolicyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPolicyView.swift; sourceTree = "<group>"; };
+		C99E46572E73582500A55912 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		C99E46582E73582500A55912 /* TermsOfServiceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TermsOfServiceView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -47,6 +55,10 @@
 				AA0000002 /* ZenTimerApp.swift */,
 				AA0000004 /* ContentView.swift */,
 				AA0000006 /* TimerView.swift */,
+				C99E46552E73582500A55912 /* HelpSupportView.swift */,
+				C99E46562E73582500A55912 /* PrivacyPolicyView.swift */,
+				C99E46572E73582500A55912 /* SettingsView.swift */,
+				C99E46582E73582500A55912 /* TermsOfServiceView.swift */,
 				AA0000008 /* TimerViewModel.swift */,
 				AA0000010 /* CircularProgressView.swift */,
 				AA0000012 /* ControlButtons.swift */,
@@ -126,23 +138,6 @@
 		};
 /* End PBXProject section */
 
-/* Begin PBXSourcesBuildPhase section */
-		AA0000022 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				AA0000001 /* ZenTimerApp.swift in Sources */,
-				AA0000003 /* ContentView.swift in Sources */,
-				AA0000005 /* TimerView.swift in Sources */,
-				AA0000007 /* TimerViewModel.swift in Sources */,
-				AA0000009 /* CircularProgressView.swift in Sources */,
-				AA0000011 /* ControlButtons.swift in Sources */,
-				AA0000013 /* DragGestureHandler.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXSourcesBuildPhase section */
-
 /* Begin PBXResourcesBuildPhase section */
 		AA0000032 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
@@ -153,6 +148,27 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		AA0000022 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA0000001 /* ZenTimerApp.swift in Sources */,
+				AA0000003 /* ContentView.swift in Sources */,
+				AA0000005 /* TimerView.swift in Sources */,
+				AA0000007 /* TimerViewModel.swift in Sources */,
+				C99E46592E73582500A55912 /* HelpSupportView.swift in Sources */,
+				C99E465A2E73582500A55912 /* SettingsView.swift in Sources */,
+				C99E465B2E73582500A55912 /* PrivacyPolicyView.swift in Sources */,
+				C99E465C2E73582500A55912 /* TermsOfServiceView.swift in Sources */,
+				AA0000009 /* CircularProgressView.swift in Sources */,
+				AA0000011 /* ControlButtons.swift in Sources */,
+				AA0000013 /* DragGestureHandler.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
 		AA0000025 /* Debug */ = {

@@ -40,7 +40,8 @@ struct PrivacyPolicyView: View {
                                 .foregroundColor(.white.opacity(0.9))
                                 .lineSpacing(4)
                         }
-                        .padding()
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 16)
                         .background(.white.opacity(0.15))
                         .cornerRadius(12)
                         
@@ -54,7 +55,8 @@ struct PrivacyPolicyView: View {
                                 .foregroundColor(.white.opacity(0.9))
                                 .lineSpacing(4)
                         }
-                        .padding()
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 16)
                         .background(.white.opacity(0.15))
                         .cornerRadius(12)
                         
@@ -68,7 +70,8 @@ struct PrivacyPolicyView: View {
                                 .foregroundColor(.white.opacity(0.9))
                                 .lineSpacing(4)
                         }
-                        .padding()
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 16)
                         .background(.white.opacity(0.15))
                         .cornerRadius(12)
                         
@@ -82,7 +85,8 @@ struct PrivacyPolicyView: View {
                                 .foregroundColor(.white.opacity(0.9))
                                 .lineSpacing(4)
                         }
-                        .padding()
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 16)
                         .background(.white.opacity(0.15))
                         .cornerRadius(12)
                         
@@ -96,7 +100,8 @@ struct PrivacyPolicyView: View {
                                 .foregroundColor(.white.opacity(0.9))
                                 .lineSpacing(4)
                         }
-                        .padding()
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 16)
                         .background(.white.opacity(0.15))
                         .cornerRadius(12)
                         
@@ -110,7 +115,8 @@ struct PrivacyPolicyView: View {
                                 .foregroundColor(.white.opacity(0.9))
                                 .lineSpacing(4)
                         }
-                        .padding()
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 16)
                         .background(.white.opacity(0.15))
                         .cornerRadius(12)
                         
@@ -124,7 +130,8 @@ struct PrivacyPolicyView: View {
                                 .foregroundColor(.white.opacity(0.9))
                                 .lineSpacing(4)
                         }
-                        .padding()
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 16)
                         .background(.white.opacity(0.15))
                         .cornerRadius(12)
                         
