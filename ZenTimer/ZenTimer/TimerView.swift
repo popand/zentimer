@@ -1,7 +1,9 @@
 import SwiftUI
+import Foundation
 
 struct TimerView: View {
     @StateObject private var viewModel = TimerViewModel()
+    @State private var showingSettings = false
     
     var body: some View {
         GeometryReader { geometry in
@@ -68,10 +70,44 @@ struct TimerView: View {
                     NotificationMessage(viewModel: viewModel)
                         .padding(.top, 16)
                 }
+                
+                // Settings Button - Top Right
+                VStack {
+                    HStack {
+                        Spacer()
+                        Button(action: {
+                            showingSettings.toggle()
+                            let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+                            impactFeedback.impactOccurred()
+                        }) {
+                            Image(systemName: "gearshape.fill")
+                                .font(.system(size: 20))
+                                .foregroundColor(.white.opacity(0.8))
+                                .frame(width: 44, height: 44)
+                                .background(
+                                    Circle()
+                                        .fill(.white.opacity(0.15))
+                                        .background(.ultraThinMaterial)
+                                )
+                                .clipShape(Circle())
+                                .overlay(
+                                    Circle()
+                                        .stroke(.white.opacity(0.2), lineWidth: 1)
+                                )
+                        }
+                        .padding(.top, 60)
+                        .padding(.trailing, 20)
+                    }
+                    Spacer()
+                }
             }
+        }
+        .sheet(isPresented: $showingSettings) {
+            SimpleSettingsView()
         }
     }
 }
+
 
 #Preview {
     TimerView()
