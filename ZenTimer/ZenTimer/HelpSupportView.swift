@@ -35,6 +35,7 @@ struct HelpSupportView: View {
                                 .foregroundColor(.white.opacity(0.9))
                                 .lineSpacing(4)
                         }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 16)
                         .background(.white.opacity(0.15))
@@ -50,6 +51,7 @@ struct HelpSupportView: View {
                                 .foregroundColor(.white.opacity(0.9))
                                 .lineSpacing(4)
                         }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 16)
                         .background(.white.opacity(0.15))
@@ -65,6 +67,7 @@ struct HelpSupportView: View {
                                 .foregroundColor(.white.opacity(0.9))
                                 .lineSpacing(4)
                         }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 16)
                         .background(.white.opacity(0.15))
@@ -80,6 +83,7 @@ struct HelpSupportView: View {
                                 .foregroundColor(.white.opacity(0.9))
                                 .lineSpacing(4)
                         }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 16)
                         .background(.white.opacity(0.15))
@@ -175,6 +179,7 @@ struct HelpSupportView: View {
                                 .foregroundColor(.white.opacity(0.7))
                                 .padding(.top, 8)
                         }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 16)
                         .background(.white.opacity(0.15))
