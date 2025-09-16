@@ -2,7 +2,7 @@ import SwiftUI
 import Foundation
 
 struct TimerView: View {
-    @StateObject private var viewModel = TimerViewModel()
+    @EnvironmentObject private var viewModel: TimerViewModel
     @State private var showingSettings = false
     @Environment(\.scenePhase) var scenePhase
     

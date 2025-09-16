@@ -5,6 +5,7 @@ import UserNotifications
 import AudioToolbox
 import Intents
 import BackgroundTasks
+import UIKit
 
 class TimerViewModel: ObservableObject {
     @Published var minutes: Int = 5
@@ -28,12 +29,29 @@ class TimerViewModel: ObservableObject {
     private var messageTimer: Timer?
     private var timerEndDate: Date?
     private let userDefaults = UserDefaults.standard
+    private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier = .invalid
+
+    // Constants for UserDefaults keys
+    private struct UserDefaultsKeys {
+        static let timerEndDate = "timerEndDate"
+        static let timerTotalSeconds = "timerTotalSeconds"
+        static let timerStartDate = "timerStartDate"
+        static let flashEnabled = "flashEnabled"
+        static let vibrationEnabled = "vibrationEnabled"
+        static let soundEnabled = "soundEnabled"
+        static let doNotDisturbEnabled = "doNotDisturbEnabled"
+        static let appVersion = "appVersion"
+    }
     
     init() {
+        // Load saved preferences first
+        loadUserPreferences()
         // Request notification permissions on initialization
         requestNotificationPermissions()
         // Restore timer state if app was terminated while timer was running
         restoreTimerStateIfNeeded()
+        // Setup app lifecycle observers
+        setupAppLifecycleObservers()
     }
     
     var progress: Double {
@@ -108,15 +126,19 @@ class TimerViewModel: ObservableObject {
     
     private func startTimer() {
         // Calculate and save the timer end date
-        timerEndDate = Date().addingTimeInterval(TimeInterval(timeLeft))
-        saveTimerState()
-        
+        let startDate = Date()
+        timerEndDate = startDate.addingTimeInterval(TimeInterval(timeLeft))
+        saveTimerState(startDate: startDate)
+
+        // Start background task to ensure timer accuracy
+        startBackgroundTask()
+
         // Schedule a local notification for timer completion
         scheduleTimerCompletionNotification()
-        
+
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             guard let self = self else { return }
-            
+
             // Update time based on the end date to stay accurate
             if let endDate = self.timerEndDate {
                 let remainingTime = Int(endDate.timeIntervalSinceNow)
@@ -138,6 +160,7 @@ class TimerViewModel: ObservableObject {
         timerEndDate = nil
         clearTimerState()
         cancelTimerNotification()
+        endBackgroundTask()
     }
     
     private func showTemporaryMessage(_ message: String, duration: TimeInterval = 3.0) {
@@ -258,21 +281,25 @@ class TimerViewModel: ObservableObject {
     
     func toggleFlash() {
         flashEnabled.toggle()
+        saveUserPreferences()
         print("📸 Flash notification: \(flashEnabled ? "ENABLED" : "DISABLED")")
     }
-    
+
     func toggleVibration() {
         vibrationEnabled.toggle()
+        saveUserPreferences()
         print("📳 Vibration notification: \(vibrationEnabled ? "ENABLED" : "DISABLED")")
     }
-    
+
     func toggleSound() {
         soundEnabled.toggle()
+        saveUserPreferences()
         print("🔊 Sound notification: \(soundEnabled ? "ENABLED" : "DISABLED")")
     }
-    
+
     func toggleDoNotDisturb() {
         doNotDisturbEnabled.toggle()
+        saveUserPreferences()
         print("🔕 Do Not Disturb mode: \(doNotDisturbEnabled ? "ENABLED" : "DISABLED")")
         if doNotDisturbEnabled {
             enableDoNotDisturbFeatures()
@@ -352,38 +379,99 @@ class TimerViewModel: ObservableObject {
     }
     
     // MARK: - Timer State Persistence
-    
-    private func saveTimerState() {
+
+    private func saveTimerState(startDate: Date) {
         guard let endDate = timerEndDate else { return }
-        userDefaults.set(endDate, forKey: "timerEndDate")
-        userDefaults.set(totalSeconds, forKey: "timerTotalSeconds")
+        userDefaults.set(endDate, forKey: UserDefaultsKeys.timerEndDate)
+        userDefaults.set(totalSeconds, forKey: UserDefaultsKeys.timerTotalSeconds)
+        userDefaults.set(startDate, forKey: UserDefaultsKeys.timerStartDate)
+        userDefaults.set(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0", forKey: UserDefaultsKeys.appVersion)
+        print("💾 Timer state saved: endDate=\(endDate), totalSeconds=\(totalSeconds)")
     }
-    
+
     private func clearTimerState() {
-        userDefaults.removeObject(forKey: "timerEndDate")
-        userDefaults.removeObject(forKey: "timerTotalSeconds")
+        userDefaults.removeObject(forKey: UserDefaultsKeys.timerEndDate)
+        userDefaults.removeObject(forKey: UserDefaultsKeys.timerTotalSeconds)
+        userDefaults.removeObject(forKey: UserDefaultsKeys.timerStartDate)
+        print("🗑️ Timer state cleared")
     }
-    
+
+    private func saveUserPreferences() {
+        userDefaults.set(flashEnabled, forKey: UserDefaultsKeys.flashEnabled)
+        userDefaults.set(vibrationEnabled, forKey: UserDefaultsKeys.vibrationEnabled)
+        userDefaults.set(soundEnabled, forKey: UserDefaultsKeys.soundEnabled)
+        userDefaults.set(doNotDisturbEnabled, forKey: UserDefaultsKeys.doNotDisturbEnabled)
+    }
+
+    private func loadUserPreferences() {
+        // Load preferences with defaults
+        flashEnabled = userDefaults.bool(forKey: UserDefaultsKeys.flashEnabled)
+        vibrationEnabled = userDefaults.object(forKey: UserDefaultsKeys.vibrationEnabled) as? Bool ?? true // Default to true
+        soundEnabled = userDefaults.bool(forKey: UserDefaultsKeys.soundEnabled)
+        doNotDisturbEnabled = userDefaults.bool(forKey: UserDefaultsKeys.doNotDisturbEnabled)
+    }
+
     func restoreTimerStateIfNeeded() {
-        guard let endDate = userDefaults.object(forKey: "timerEndDate") as? Date else { return }
-        
+        guard let endDate = userDefaults.object(forKey: UserDefaultsKeys.timerEndDate) as? Date,
+              let startDate = userDefaults.object(forKey: UserDefaultsKeys.timerStartDate) as? Date else {
+            print("📱 No timer state to restore")
+            return
+        }
+
+        // Validate that the saved state is reasonable (not from too long ago)
+        let timeSinceStart = Date().timeIntervalSince(startDate)
+        guard timeSinceStart < 24 * 60 * 60 else { // 24 hours max
+            print("⚠️ Timer state is too old, clearing")
+            clearTimerState()
+            return
+        }
+
         let remainingTime = Int(endDate.timeIntervalSinceNow)
+        let savedTotalSeconds = userDefaults.integer(forKey: UserDefaultsKeys.timerTotalSeconds)
+
         if remainingTime > 0 {
             // Timer is still running
+            print("🔄 Restoring running timer: \(remainingTime)s remaining")
             timerEndDate = endDate
             timeLeft = remainingTime
-            totalSeconds = userDefaults.integer(forKey: "timerTotalSeconds")
-            if totalSeconds == 0 {
-                totalSeconds = timeLeft // Fallback if total wasn't saved
-            }
-            minutes = (totalSeconds + 59) / 60 // Round up
+            totalSeconds = savedTotalSeconds > 0 ? savedTotalSeconds : remainingTime
+            minutes = max(1, (totalSeconds + 59) / 60) // Round up, minimum 1
             isRunning = true
-            startTimer()
-        } else {
-            // Timer has expired
+
+            // Start the timer without calling startTimer() to avoid double-saving state
+            startBackgroundTask()
+            timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+                guard let self = self else { return }
+
+                if let endDate = self.timerEndDate {
+                    let remainingTime = Int(endDate.timeIntervalSinceNow)
+                    if remainingTime > 0 {
+                        self.timeLeft = remainingTime
+                    } else {
+                        self.timeLeft = 0
+                        self.stopTimer()
+                        self.isRunning = false
+                        self.triggerNotifications()
+                    }
+                }
+            }
+        } else if remainingTime > -60 { // Timer finished recently (within last minute)
+            print("⏰ Timer recently completed")
             clearTimerState()
             timeLeft = 0
             isRunning = false
+            totalSeconds = savedTotalSeconds > 0 ? savedTotalSeconds : 5 * 60
+            minutes = max(1, (totalSeconds + 59) / 60)
+            // Trigger completion notifications since user missed them
+            triggerNotifications()
+        } else {
+            // Timer expired a while ago
+            print("⏰ Timer expired, clearing state")
+            clearTimerState()
+            timeLeft = 0
+            isRunning = false
+            totalSeconds = savedTotalSeconds > 0 ? savedTotalSeconds : 5 * 60
+            minutes = max(1, (totalSeconds + 59) / 60)
         }
     }
     
@@ -418,8 +506,118 @@ class TimerViewModel: ObservableObject {
         print("❌ Timer notification cancelled")
     }
 
-    deinit {
-        stopTimer()
+    // MARK: - Public Methods for App Lifecycle
+
+    /// Call this when the app becomes active to ensure timer accuracy
+    func handleAppBecameActive() {
+        if isRunning, let endDate = timerEndDate {
+            let remainingTime = Int(endDate.timeIntervalSinceNow)
+            if remainingTime > 0 {
+                timeLeft = remainingTime
+            } else {
+                timeLeft = 0
+                stopTimer()
+                isRunning = false
+                triggerNotifications()
+            }
+        }
+    }
+
+    /// Call this when the app is about to terminate to ensure cleanup
+    func handleAppWillTerminate() {
+        cleanupResources()
+    }
+
+    // MARK: - Background Task Management
+
+    private func startBackgroundTask() {
+        guard backgroundTaskIdentifier == .invalid else { return }
+
+        backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask { [weak self] in
+            print("⚠️ Background task expired, ending task")
+            self?.endBackgroundTask()
+        }
+
+        if backgroundTaskIdentifier != .invalid {
+            print("🏃 Background task started: \(backgroundTaskIdentifier.rawValue)")
+        } else {
+            print("❌ Failed to start background task")
+        }
+    }
+
+    private func endBackgroundTask() {
+        guard backgroundTaskIdentifier != .invalid else { return }
+
+        print("🛑 Ending background task: \(backgroundTaskIdentifier.rawValue)")
+        UIApplication.shared.endBackgroundTask(backgroundTaskIdentifier)
+        backgroundTaskIdentifier = .invalid
+    }
+
+    // MARK: - App Lifecycle Management
+
+    private func setupAppLifecycleObservers() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(appWillEnterForeground),
+            name: UIApplication.willEnterForegroundNotification,
+            object: nil
+        )
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(appDidEnterBackground),
+            name: UIApplication.didEnterBackgroundNotification,
+            object: nil
+        )
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(appWillTerminate),
+            name: UIApplication.willTerminateNotification,
+            object: nil
+        )
+    }
+
+    @objc private func appWillEnterForeground() {
+        print("📱 App entering foreground")
+        // Verify timer accuracy when returning from background
+        if isRunning, let endDate = timerEndDate {
+            let remainingTime = Int(endDate.timeIntervalSinceNow)
+            if remainingTime <= 0 {
+                // Timer expired while in background
+                timeLeft = 0
+                stopTimer()
+                isRunning = false
+                triggerNotifications()
+            } else {
+                // Update time to ensure accuracy
+                timeLeft = remainingTime
+            }
+        }
+    }
+
+    @objc private func appDidEnterBackground() {
+        print("📱 App entering background")
+        // Background task is already running if timer is active
+        // No additional action needed here
+    }
+
+    @objc private func appWillTerminate() {
+        print("📱 App terminating")
+        cleanupResources()
+    }
+
+    private func cleanupResources() {
+        timer?.invalidate()
+        timer = nil
         messageTimer?.invalidate()
+        messageTimer = nil
+        endBackgroundTask()
+        NotificationCenter.default.removeObserver(self)
+    }
+
+    deinit {
+        print("♻️ TimerViewModel deallocating")
+        cleanupResources()
     }
 }
