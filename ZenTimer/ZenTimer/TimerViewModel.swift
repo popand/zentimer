@@ -773,6 +773,9 @@ class TimerViewModel: ObservableObject {
 
     func debugNotificationStatus() {
         print("\n🔍 === NOTIFICATION DEBUG STATUS ===")
+        print("📱 Timer Running: \(isRunning)")
+        print("📱 Time Left: \(timeLeft)")
+        print("📱 Background Task: \(backgroundTaskIdentifier != .invalid ? "Active (\(backgroundTaskIdentifier.rawValue))" : "Inactive")")
 
         UNUserNotificationCenter.current().getNotificationSettings { settings in
             DispatchQueue.main.async {
