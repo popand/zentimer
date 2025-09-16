@@ -39,7 +39,6 @@
 	<string>ZenTimer can send gentle notifications when your timer completes. These notifications are suppressed when Do Not Disturb mode is enabled for a truly zen experience.</string>
 	<key>UIBackgroundModes</key>
 	<array>
-		<string>audio</string>
 		<string>processing</string>
 	</array>
 	<key>NSSupportsLiveActivities</key>

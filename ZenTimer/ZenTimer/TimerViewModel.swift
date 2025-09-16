@@ -26,8 +26,15 @@ class TimerViewModel: ObservableObject {
     
     private var timer: Timer?
     private var messageTimer: Timer?
-    private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier = .invalid
-    private var audioSession: AVAudioSession?
+    private var timerEndDate: Date?
+    private let userDefaults = UserDefaults.standard
+    
+    init() {
+        // Request notification permissions on initialization
+        requestNotificationPermissions()
+        // Restore timer state if app was terminated while timer was running
+        restoreTimerStateIfNeeded()
+    }
     
     var progress: Double {
         guard totalSeconds > 0 else { return 1.0 }
@@ -100,21 +107,27 @@ class TimerViewModel: ObservableObject {
     }
     
     private func startTimer() {
-        // Start background task to keep timer running
-        startBackgroundTask()
-
-        // Configure audio session for background playback
-        configureAudioSession()
-
+        // Calculate and save the timer end date
+        timerEndDate = Date().addingTimeInterval(TimeInterval(timeLeft))
+        saveTimerState()
+        
+        // Schedule a local notification for timer completion
+        scheduleTimerCompletionNotification()
+        
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             guard let self = self else { return }
-
-            if self.timeLeft > 0 {
-                self.timeLeft -= 1
-            } else {
-                self.stopTimer()
-                self.isRunning = false
-                self.triggerNotifications()
+            
+            // Update time based on the end date to stay accurate
+            if let endDate = self.timerEndDate {
+                let remainingTime = Int(endDate.timeIntervalSinceNow)
+                if remainingTime > 0 {
+                    self.timeLeft = remainingTime
+                } else {
+                    self.timeLeft = 0
+                    self.stopTimer()
+                    self.isRunning = false
+                    self.triggerNotifications()
+                }
             }
         }
     }
@@ -122,8 +135,9 @@ class TimerViewModel: ObservableObject {
     private func stopTimer() {
         timer?.invalidate()
         timer = nil
-        endBackgroundTask()
-        deactivateAudioSession()
+        timerEndDate = nil
+        clearTimerState()
+        cancelTimerNotification()
     }
     
     private func showTemporaryMessage(_ message: String, duration: TimeInterval = 3.0) {
@@ -337,42 +351,75 @@ class TimerViewModel: ObservableObject {
         return true
     }
     
-    // MARK: - Background Task Management
-
-    private func startBackgroundTask() {
-        backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask { [weak self] in
-            self?.endBackgroundTask()
+    // MARK: - Timer State Persistence
+    
+    private func saveTimerState() {
+        guard let endDate = timerEndDate else { return }
+        userDefaults.set(endDate, forKey: "timerEndDate")
+        userDefaults.set(totalSeconds, forKey: "timerTotalSeconds")
+    }
+    
+    private func clearTimerState() {
+        userDefaults.removeObject(forKey: "timerEndDate")
+        userDefaults.removeObject(forKey: "timerTotalSeconds")
+    }
+    
+    func restoreTimerStateIfNeeded() {
+        guard let endDate = userDefaults.object(forKey: "timerEndDate") as? Date else { return }
+        
+        let remainingTime = Int(endDate.timeIntervalSinceNow)
+        if remainingTime > 0 {
+            // Timer is still running
+            timerEndDate = endDate
+            timeLeft = remainingTime
+            totalSeconds = userDefaults.integer(forKey: "timerTotalSeconds")
+            if totalSeconds == 0 {
+                totalSeconds = timeLeft // Fallback if total wasn't saved
+            }
+            minutes = (totalSeconds + 59) / 60 // Round up
+            isRunning = true
+            startTimer()
+        } else {
+            // Timer has expired
+            clearTimerState()
+            timeLeft = 0
+            isRunning = false
         }
     }
-
-    private func endBackgroundTask() {
-        if backgroundTaskIdentifier != .invalid {
-            UIApplication.shared.endBackgroundTask(backgroundTaskIdentifier)
-            backgroundTaskIdentifier = .invalid
+    
+    // MARK: - Local Notifications
+    
+    private func scheduleTimerCompletionNotification() {
+        guard let endDate = timerEndDate else { return }
+        
+        let content = UNMutableNotificationContent()
+        content.title = "Timer Complete"
+        content.body = "Your \(minutes) minute timer has finished."
+        content.sound = .default
+        content.categoryIdentifier = "TIMER_COMPLETE"
+        
+        let timeInterval = endDate.timeIntervalSinceNow
+        guard timeInterval > 0 else { return }
+        
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: timeInterval, repeats: false)
+        let request = UNNotificationRequest(identifier: "timer.completion", content: content, trigger: trigger)
+        
+        UNUserNotificationCenter.current().add(request) { error in
+            if let error = error {
+                print("Failed to schedule notification: \(error)")
+            } else {
+                print("✅ Timer completion notification scheduled for \(endDate)")
+            }
         }
     }
-
-    private func configureAudioSession() {
-        do {
-            audioSession = AVAudioSession.sharedInstance()
-            try audioSession?.setCategory(.playback, mode: .default, options: [.mixWithOthers])
-            try audioSession?.setActive(true)
-        } catch {
-            print("Failed to configure audio session: \(error)")
-        }
-    }
-
-    private func deactivateAudioSession() {
-        do {
-            try audioSession?.setActive(false)
-        } catch {
-            print("Failed to deactivate audio session: \(error)")
-        }
+    
+    private func cancelTimerNotification() {
+        UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: ["timer.completion"])
+        print("❌ Timer notification cancelled")
     }
 
     deinit {
         stopTimer()
         messageTimer?.invalidate()
-        endBackgroundTask()
     }
 }
