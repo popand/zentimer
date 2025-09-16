@@ -115,6 +115,9 @@ class NotificationDelegate: NSObject, ObservableObject, UNUserNotificationCenter
             return
         }
 
+        // Clear badge number when user interacts with notification
+        viewModel.clearAppBadge()
+
         switch response.actionIdentifier {
         case "STOP_TIMER":
             viewModel.stopTimer()

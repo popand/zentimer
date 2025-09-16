@@ -647,6 +647,9 @@ class TimerViewModel: ObservableObject {
 
     /// Call this when the app becomes active to ensure timer accuracy
     func handleAppBecameActive() {
+        // Clear badge number when app becomes active
+        clearAppBadge()
+
         if isRunning, let endDate = timerEndDate {
             let remainingTime = Int(endDate.timeIntervalSinceNow)
             if remainingTime > 0 {
@@ -692,6 +695,10 @@ class TimerViewModel: ObservableObject {
 
     @objc private func appWillEnterForeground() {
         print("📱 App entering foreground")
+
+        // Clear badge number when app returns to foreground
+        clearAppBadge()
+
         // Verify timer accuracy when returning from background
         if isRunning, let endDate = timerEndDate {
             let remainingTime = Int(endDate.timeIntervalSinceNow)
@@ -729,6 +736,18 @@ class TimerViewModel: ObservableObject {
     deinit {
         print("♻️ TimerViewModel deallocating")
         cleanupResources()
+    }
+
+    // MARK: - Badge Management
+
+    /// Clear the app badge number and remove delivered notifications
+    func clearAppBadge() {
+        DispatchQueue.main.async {
+            UIApplication.shared.applicationIconBadgeNumber = 0
+            // Also clear delivered notifications to clean up notification center
+            UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: ["timer.completion"])
+            print("🔢 App badge cleared and delivered timer notifications removed")
+        }
     }
 
     // MARK: - Debug Methods
