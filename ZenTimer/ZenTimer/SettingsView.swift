@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SimpleSettingsView: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var viewModel: TimerViewModel
     @State private var showingHelpSupport = false
     @State private var showingPrivacyPolicy = false
     @State private var showingTermsOfService = false
@@ -159,14 +160,14 @@ struct SimpleSettingsView: View {
                         .cornerRadius(12)
                     }
                     .padding()
-                    
+
                     Spacer()
                     
                     // Copyright Notice
                     Text("© 2025 ZenTimer. All rights reserved.")
                         .font(.system(size: 12, weight: .regular))
                         .foregroundColor(.white.opacity(0.6))
-                        .padding(.bottom, 20)
+                    .padding(.bottom, 20)
                 }
             }
             .navigationBarTitleDisplayMode(.inline)

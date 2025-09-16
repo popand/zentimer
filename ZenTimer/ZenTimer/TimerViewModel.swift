@@ -146,21 +146,32 @@ class TimerViewModel: ObservableObject {
                     self.timeLeft = remainingTime
                 } else {
                     self.timeLeft = 0
-                    self.stopTimer()
+                    self.completeTimer() // Use completeTimer instead of stopTimer
                     self.isRunning = false
-                    self.triggerNotifications()
                 }
             }
         }
     }
     
-    private func stopTimer() {
+    func stopTimer() {
+        // User-initiated stop - cancel everything
         timer?.invalidate()
         timer = nil
         timerEndDate = nil
         clearTimerState()
         cancelTimerNotification()
         endBackgroundTask()
+    }
+
+    private func completeTimer() {
+        // Natural timer completion - don't cancel notification, let it fire
+        timer?.invalidate()
+        timer = nil
+        timerEndDate = nil
+        clearTimerState() // Still clear state since timer is done
+        // Don't cancel notification - let it fire naturally
+        endBackgroundTask()
+        triggerNotifications() // Trigger foreground notifications if app is active
     }
     
     private func showTemporaryMessage(_ message: String, duration: TimeInterval = 3.0) {
@@ -177,11 +188,26 @@ class TimerViewModel: ObservableObject {
     }
     
     // MARK: - Notification Methods
-    
+
     private func triggerNotifications() {
+        let appState = UIApplication.shared.applicationState
+        print("🔔 Timer completed - app state: \(appState == .active ? "foreground" : appState == .background ? "background" : "inactive")")
+
+        // If app is in background, the local notification should handle everything
+        // Only trigger in-app notifications when app is active
+        if appState == .active {
+            triggerForegroundNotifications()
+        } else {
+            print("📱 App in background - relying on scheduled local notification")
+            // Verify that we have a scheduled notification
+            checkPendingNotifications()
+        }
+    }
+
+    private func triggerForegroundNotifications() {
         // Check if we should trigger notifications based on Do Not Disturb settings
         if !shouldTriggerNotifications() {
-            print("🔕 Do Not Disturb active - limited notifications:")
+            print("🔕 Do Not Disturb active - limited foreground notifications:")
             // In Do Not Disturb mode, only trigger the most gentle notification
             if vibrationEnabled {
                 print("  📳 Triggering gentle vibration (DND mode)")
@@ -193,28 +219,45 @@ class TimerViewModel: ObservableObject {
             print("  🔊 Sound suppressed (DND mode)")
             return
         }
-        
-        // Normal notification behavior
-        print("🔔 Timer completed - triggering enabled notifications:")
+
+        // Normal foreground notification behavior
+        print("🔔 Timer completed - triggering enabled foreground notifications:")
         if vibrationEnabled {
             print("  📳 Triggering vibration")
             triggerCalmingVibration()
         } else {
             print("  📳 Vibration skipped (disabled)")
         }
-        
+
         if flashEnabled {
             print("  📸 Triggering flash")
             triggerFlash()
         } else {
             print("  📸 Flash skipped (disabled)")
         }
-        
+
         if soundEnabled {
             print("  🔊 Triggering sound")
             triggerCalmingSound()
         } else {
             print("  🔊 Sound skipped (disabled)")
+        }
+    }
+
+    private func checkPendingNotifications() {
+        UNUserNotificationCenter.current().getPendingNotificationRequests { requests in
+            let timerNotifications = requests.filter { $0.identifier == "timer.completion" }
+            print("📱 Pending timer notifications: \(timerNotifications.count)")
+
+            if timerNotifications.isEmpty {
+                print("⚠️ No pending timer notification found - this might be why background notifications aren't working")
+            } else {
+                for request in timerNotifications {
+                    if let trigger = request.trigger as? UNTimeIntervalNotificationTrigger {
+                        print("   ⏰ Notification scheduled to fire in \(trigger.timeInterval) seconds")
+                    }
+                }
+            }
         }
     }
     
@@ -311,17 +354,18 @@ class TimerViewModel: ObservableObject {
     
     private func enableDoNotDisturbFeatures() {
         // Implement app-level Do Not Disturb features
-        
-        // 1. Request notification permissions if needed
+
+        // 1. Request notification permissions if needed (essential for background operation)
         requestNotificationPermissions()
-        
+
         // 2. Check if system Focus is already active
         checkSystemFocusStatus()
-        
-        // 3. Suppress our app's notifications during timer
-        // 4. Provide user guidance for manual Focus setup
-        
+
+        // 3. DO NOT suppress background notifications - they're needed for timer completion
+        // 4. Only suppress in-app foreground notifications (flash, extra sounds)
+
         print("✅ Zen Timer Do Not Disturb enabled")
+        print("📱 Background notifications will still work for timer completion")
         print("💡 Tip: Enable iOS Focus mode manually for system-wide quiet time")
     }
     
@@ -330,13 +374,34 @@ class TimerViewModel: ObservableObject {
     }
     
     private func requestNotificationPermissions() {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, error in
-            DispatchQueue.main.async {
-                if granted {
-                    print("📱 Notification permissions granted")
-                } else {
-                    print("🚫 Notification permissions denied")
+        // First check current authorization status
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            print("📱 Current notification settings: \(settings.authorizationStatus.rawValue)")
+
+            switch settings.authorizationStatus {
+            case .notDetermined:
+                // First time - request permission with critical options for background notifications
+                UNUserNotificationCenter.current().requestAuthorization(
+                    options: [.alert, .sound, .badge, .criticalAlert, .providesAppNotificationSettings]
+                ) { granted, error in
+                    DispatchQueue.main.async {
+                        if granted {
+                            print("✅ Notification permissions granted including critical alerts")
+                        } else {
+                            print("❌ Notification permissions denied: \(error?.localizedDescription ?? "Unknown error")")
+                            print("   ⚠️ Background timer notifications may not work properly")
+                        }
+                    }
                 }
+            case .denied:
+                print("🚫 Notifications denied - user needs to enable in Settings")
+                print("   💡 Background timer completion will not work without notifications")
+            case .authorized, .provisional:
+                print("✅ Notifications already authorized")
+            case .ephemeral:
+                print("⏰ Ephemeral authorization (App Clips)")
+            @unknown default:
+                print("⚠️ Unknown notification authorization status")
             }
         }
     }
@@ -356,9 +421,20 @@ class TimerViewModel: ObservableObject {
     }
     
     private func suppressAllNotifications() {
-        // Remove any pending notifications from our app
-        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
-        print("🔕 All notifications suppressed")
+        // Remove non-essential notifications, but keep timer completion notification
+        // This preserves the critical timer functionality while respecting Focus mode
+        UNUserNotificationCenter.current().getPendingNotificationRequests { requests in
+            let nonTimerRequests = requests.compactMap { request in
+                request.identifier != "timer.completion" ? request.identifier : nil
+            }
+
+            if !nonTimerRequests.isEmpty {
+                UNUserNotificationCenter.current().removePendingNotificationRequests(withIdentifiers: nonTimerRequests)
+                print("🔕 Non-essential notifications suppressed, timer notification preserved")
+            } else {
+                print("🔕 No non-essential notifications to suppress")
+            }
+        }
     }
     
     // Enhanced notification method that respects Do Not Disturb
@@ -449,9 +525,8 @@ class TimerViewModel: ObservableObject {
                         self.timeLeft = remainingTime
                     } else {
                         self.timeLeft = 0
-                        self.stopTimer()
+                        self.completeTimer() // Use completeTimer for natural completion
                         self.isRunning = false
-                        self.triggerNotifications()
                     }
                 }
             }
@@ -479,24 +554,94 @@ class TimerViewModel: ObservableObject {
     
     private func scheduleTimerCompletionNotification() {
         guard let endDate = timerEndDate else { return }
-        
+
+        // Always schedule a background notification regardless of DND settings
+        // The system notification will handle background/locked states
+        UNUserNotificationCenter.current().getNotificationSettings { [weak self] settings in
+            guard let self = self else { return }
+
+            switch settings.authorizationStatus {
+            case .authorized, .provisional:
+                // Always create the notification - it's essential for background operation
+                self.createAndScheduleNotification(endDate: endDate)
+                print("🔔 Background notification scheduled (required for background timer completion)")
+            case .denied:
+                print("🚫 Cannot schedule background notification - permissions denied")
+                print("   ⚠️ Timer notifications will only work when app is in foreground")
+            case .notDetermined:
+                print("⚠️ Notification permissions not determined - requesting and scheduling")
+                // Request permissions and schedule after getting them
+                self.requestNotificationPermissions()
+                // Schedule anyway in case permissions are granted quickly
+                self.createAndScheduleNotification(endDate: endDate)
+            default:
+                print("⚠️ Notification authorization status: \(settings.authorizationStatus)")
+                // Still try to schedule - some states might allow notifications
+                self.createAndScheduleNotification(endDate: endDate)
+            }
+        }
+    }
+
+    private func createAndScheduleNotification(endDate: Date) {
         let content = UNMutableNotificationContent()
-        content.title = "Timer Complete"
-        content.body = "Your \(minutes) minute timer has finished."
-        content.sound = .default
+        content.title = "🧘 ZenTimer Complete"
+        content.body = "Your \(minutes) minute meditation timer has finished. Time to return to mindfulness."
         content.categoryIdentifier = "TIMER_COMPLETE"
-        
+        content.badge = NSNumber(value: 1)
+        content.threadIdentifier = "zentimer.notifications"
+
+        // Configure sound for background notifications
+        // Background notifications need sound to trigger properly and provide haptic feedback
+        if soundEnabled {
+            // User wants sound - use critical sound to ensure it plays even in silent mode
+            content.sound = .defaultCritical
+        } else if vibrationEnabled {
+            // User wants vibration only - use default sound which triggers vibration but can be muted
+            content.sound = .default
+        } else {
+            // User disabled both - still use default to ensure notification appears, but system will respect silent mode
+            content.sound = .default
+        }
+
+        // Add notification relevance score for iOS 15+ to ensure prominence
+        if #available(iOS 15.0, *) {
+            content.relevanceScore = 1.0 // Maximum relevance
+            content.interruptionLevel = soundEnabled ? .critical : .active
+        }
+
+        // Add custom user info for debugging
+        content.userInfo = [
+            "timerMinutes": minutes,
+            "completionTime": endDate.timeIntervalSince1970,
+            "soundEnabled": soundEnabled,
+            "vibrationEnabled": vibrationEnabled,
+            "flashEnabled": flashEnabled,
+            "doNotDisturbEnabled": doNotDisturbEnabled
+        ]
+
         let timeInterval = endDate.timeIntervalSinceNow
-        guard timeInterval > 0 else { return }
-        
+        guard timeInterval > 0 else {
+            print("⚠️ Timer end date is in the past, cannot schedule notification")
+            return
+        }
+
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: timeInterval, repeats: false)
         let request = UNNotificationRequest(identifier: "timer.completion", content: content, trigger: trigger)
-        
-        UNUserNotificationCenter.current().add(request) { error in
-            if let error = error {
-                print("Failed to schedule notification: \(error)")
-            } else {
-                print("✅ Timer completion notification scheduled for \(endDate)")
+
+        UNUserNotificationCenter.current().add(request) { [weak self] error in
+            DispatchQueue.main.async {
+                if let error = error {
+                    print("❌ Failed to schedule notification: \(error.localizedDescription)")
+                    self?.showTemporaryMessage("Failed to schedule notification: \(error.localizedDescription)")
+                } else {
+                    print("✅ Timer completion notification scheduled for background delivery")
+                    print("   📅 Scheduled for: \(endDate)")
+                    print("   ⏰ Time interval: \(timeInterval) seconds")
+                    print("   🔊 Sound enabled: \(self?.soundEnabled ?? false)")
+                    print("   📳 Vibration enabled: \(self?.vibrationEnabled ?? false)")
+                    print("   🔕 DND enabled: \(self?.doNotDisturbEnabled ?? false)")
+                    print("   📱 Will show banner/bubble when app is in background")
+                }
             }
         }
     }
@@ -516,9 +661,8 @@ class TimerViewModel: ObservableObject {
                 timeLeft = remainingTime
             } else {
                 timeLeft = 0
-                stopTimer()
+                completeTimer() // Use completeTimer for natural completion
                 isRunning = false
-                triggerNotifications()
             }
         }
     }
@@ -531,17 +675,22 @@ class TimerViewModel: ObservableObject {
     // MARK: - Background Task Management
 
     private func startBackgroundTask() {
-        guard backgroundTaskIdentifier == .invalid else { return }
+        guard backgroundTaskIdentifier == .invalid else {
+            print("🏃 Background task already active: \(backgroundTaskIdentifier.rawValue)")
+            return
+        }
 
-        backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask { [weak self] in
-            print("⚠️ Background task expired, ending task")
+        backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "ZenTimer-Background") { [weak self] in
+            print("⚠️ Background task expired, ending task gracefully")
+            // Don't stop the timer - just end the background task
+            // The notification will still fire when the timer completes
             self?.endBackgroundTask()
         }
 
         if backgroundTaskIdentifier != .invalid {
             print("🏃 Background task started: \(backgroundTaskIdentifier.rawValue)")
         } else {
-            print("❌ Failed to start background task")
+            print("❌ Failed to start background task - timer may not be accurate in background")
         }
     }
 
@@ -586,9 +735,8 @@ class TimerViewModel: ObservableObject {
             if remainingTime <= 0 {
                 // Timer expired while in background
                 timeLeft = 0
-                stopTimer()
+                completeTimer() // Use completeTimer for natural completion
                 isRunning = false
-                triggerNotifications()
             } else {
                 // Update time to ensure accuracy
                 timeLeft = remainingTime
@@ -619,5 +767,50 @@ class TimerViewModel: ObservableObject {
     deinit {
         print("♻️ TimerViewModel deallocating")
         cleanupResources()
+    }
+
+    // MARK: - Debug Methods
+
+    func debugNotificationStatus() {
+        print("\n🔍 === NOTIFICATION DEBUG STATUS ===")
+
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            DispatchQueue.main.async {
+                print("📱 Authorization Status: \(settings.authorizationStatus)")
+                print("📱 Notification Center Setting: \(settings.notificationCenterSetting)")
+                print("📱 Alert Setting: \(settings.alertSetting)")
+                print("📱 Sound Setting: \(settings.soundSetting)")
+                print("📱 Badge Setting: \(settings.badgeSetting)")
+                print("📱 Lock Screen Setting: \(settings.lockScreenSetting)")
+
+                // Check pending notifications
+                UNUserNotificationCenter.current().getPendingNotificationRequests { requests in
+                    let timerRequests = requests.filter { $0.identifier == "timer.completion" }
+                    print("📱 Pending timer notifications: \(timerRequests.count)")
+
+                    for request in timerRequests {
+                        print("   📝 ID: \(request.identifier)")
+                        print("   📝 Title: \(request.content.title)")
+                        print("   📝 Body: \(request.content.body)")
+                        if let trigger = request.trigger as? UNTimeIntervalNotificationTrigger {
+                            print("   📝 Time remaining: \(trigger.timeInterval) seconds")
+                        }
+                    }
+
+                    // Check delivered notifications
+                    UNUserNotificationCenter.current().getDeliveredNotifications { delivered in
+                        let deliveredTimer = delivered.filter { $0.request.identifier == "timer.completion" }
+                        print("📱 Delivered timer notifications: \(deliveredTimer.count)")
+                        print("🔍 === END DEBUG STATUS ===\n")
+                    }
+                }
+            }
+        }
+    }
+
+    func clearAllNotifications() {
+        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+        UNUserNotificationCenter.current().removeAllDeliveredNotifications()
+        print("🗑️ All notifications cleared")
     }
 }
