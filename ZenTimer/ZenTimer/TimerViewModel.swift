@@ -4,11 +4,12 @@ import AVFoundation
 import UserNotifications
 import AudioToolbox
 import Intents
+import BackgroundTasks
 
 class TimerViewModel: ObservableObject {
-    @Published var minutes: Int = 25
-    @Published var totalSeconds: Int = 25 * 60
-    @Published var timeLeft: Int = 25 * 60
+    @Published var minutes: Int = 5
+    @Published var totalSeconds: Int = 5 * 60
+    @Published var timeLeft: Int = 5 * 60
     @Published var isRunning: Bool = false
     @Published var isDragging: Bool = false
     @Published var dragProgress: Double? = nil
@@ -25,6 +26,8 @@ class TimerViewModel: ObservableObject {
     
     private var timer: Timer?
     private var messageTimer: Timer?
+    private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier = .invalid
+    private var audioSession: AVAudioSession?
     
     var progress: Double {
         guard totalSeconds > 0 else { return 1.0 }
@@ -97,9 +100,15 @@ class TimerViewModel: ObservableObject {
     }
     
     private func startTimer() {
+        // Start background task to keep timer running
+        startBackgroundTask()
+
+        // Configure audio session for background playback
+        configureAudioSession()
+
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             guard let self = self else { return }
-            
+
             if self.timeLeft > 0 {
                 self.timeLeft -= 1
             } else {
@@ -113,6 +122,8 @@ class TimerViewModel: ObservableObject {
     private func stopTimer() {
         timer?.invalidate()
         timer = nil
+        endBackgroundTask()
+        deactivateAudioSession()
     }
     
     private func showTemporaryMessage(_ message: String, duration: TimeInterval = 3.0) {
@@ -326,8 +337,42 @@ class TimerViewModel: ObservableObject {
         return true
     }
     
+    // MARK: - Background Task Management
+
+    private func startBackgroundTask() {
+        backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask { [weak self] in
+            self?.endBackgroundTask()
+        }
+    }
+
+    private func endBackgroundTask() {
+        if backgroundTaskIdentifier != .invalid {
+            UIApplication.shared.endBackgroundTask(backgroundTaskIdentifier)
+            backgroundTaskIdentifier = .invalid
+        }
+    }
+
+    private func configureAudioSession() {
+        do {
+            audioSession = AVAudioSession.sharedInstance()
+            try audioSession?.setCategory(.playback, mode: .default, options: [.mixWithOthers])
+            try audioSession?.setActive(true)
+        } catch {
+            print("Failed to configure audio session: \(error)")
+        }
+    }
+
+    private func deactivateAudioSession() {
+        do {
+            try audioSession?.setActive(false)
+        } catch {
+            print("Failed to deactivate audio session: \(error)")
+        }
+    }
+
     deinit {
         stopTimer()
         messageTimer?.invalidate()
+        endBackgroundTask()
     }
 }

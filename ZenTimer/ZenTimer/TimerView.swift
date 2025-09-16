@@ -2,7 +2,7 @@ import SwiftUI
 import Foundation
 
 struct TimerView: View {
-    @StateObject private var viewModel = TimerViewModel()
+    @EnvironmentObject var viewModel: TimerViewModel
     @State private var showingSettings = false
     
     var body: some View {
@@ -111,4 +111,5 @@ struct TimerView: View {
 
 #Preview {
     TimerView()
+        .environmentObject(TimerViewModel())
 }
