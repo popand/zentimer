@@ -4,7 +4,6 @@ import AVFoundation
 import UserNotifications
 import AudioToolbox
 import Intents
-import BackgroundTasks
 import UIKit
 
 class TimerViewModel: ObservableObject {
@@ -29,7 +28,6 @@ class TimerViewModel: ObservableObject {
     private var messageTimer: Timer?
     private var timerEndDate: Date?
     private let userDefaults = UserDefaults.standard
-    private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier = .invalid
 
     // Constants for UserDefaults keys
     private struct UserDefaultsKeys {
@@ -130,9 +128,6 @@ class TimerViewModel: ObservableObject {
         timerEndDate = startDate.addingTimeInterval(TimeInterval(timeLeft))
         saveTimerState(startDate: startDate)
 
-        // Start background task to ensure timer accuracy
-        startBackgroundTask()
-
         // Schedule a local notification for timer completion
         scheduleTimerCompletionNotification()
 
@@ -160,7 +155,6 @@ class TimerViewModel: ObservableObject {
         timerEndDate = nil
         clearTimerState()
         cancelTimerNotification()
-        endBackgroundTask()
     }
 
     private func completeTimer() {
@@ -170,7 +164,6 @@ class TimerViewModel: ObservableObject {
         timerEndDate = nil
         clearTimerState() // Still clear state since timer is done
         // Don't cancel notification - let it fire naturally
-        endBackgroundTask()
         triggerNotifications() // Trigger foreground notifications if app is active
     }
     
@@ -515,7 +508,6 @@ class TimerViewModel: ObservableObject {
             isRunning = true
 
             // Start the timer without calling startTimer() to avoid double-saving state
-            startBackgroundTask()
             timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
                 guard let self = self else { return }
 
@@ -672,35 +664,6 @@ class TimerViewModel: ObservableObject {
         cleanupResources()
     }
 
-    // MARK: - Background Task Management
-
-    private func startBackgroundTask() {
-        guard backgroundTaskIdentifier == .invalid else {
-            print("🏃 Background task already active: \(backgroundTaskIdentifier.rawValue)")
-            return
-        }
-
-        backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask(withName: "ZenTimer-Background") { [weak self] in
-            print("⚠️ Background task expired, ending task gracefully")
-            // Don't stop the timer - just end the background task
-            // The notification will still fire when the timer completes
-            self?.endBackgroundTask()
-        }
-
-        if backgroundTaskIdentifier != .invalid {
-            print("🏃 Background task started: \(backgroundTaskIdentifier.rawValue)")
-        } else {
-            print("❌ Failed to start background task - timer may not be accurate in background")
-        }
-    }
-
-    private func endBackgroundTask() {
-        guard backgroundTaskIdentifier != .invalid else { return }
-
-        print("🛑 Ending background task: \(backgroundTaskIdentifier.rawValue)")
-        UIApplication.shared.endBackgroundTask(backgroundTaskIdentifier)
-        backgroundTaskIdentifier = .invalid
-    }
 
     // MARK: - App Lifecycle Management
 
@@ -760,7 +723,6 @@ class TimerViewModel: ObservableObject {
         timer = nil
         messageTimer?.invalidate()
         messageTimer = nil
-        endBackgroundTask()
         NotificationCenter.default.removeObserver(self)
     }
 
@@ -775,7 +737,7 @@ class TimerViewModel: ObservableObject {
         print("\n🔍 === NOTIFICATION DEBUG STATUS ===")
         print("📱 Timer Running: \(isRunning)")
         print("📱 Time Left: \(timeLeft)")
-        print("📱 Background Task: \(backgroundTaskIdentifier != .invalid ? "Active (\(backgroundTaskIdentifier.rawValue))" : "Inactive")")
+        print("📱 Background Task: Not Used (Removed for iOS Compliance)")
 
         UNUserNotificationCenter.current().getNotificationSettings { settings in
             DispatchQueue.main.async {

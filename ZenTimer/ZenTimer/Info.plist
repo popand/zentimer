@@ -37,11 +37,6 @@
 	<string>ZenTimer uses Focus status to provide enhanced Do Not Disturb functionality and respect your current focus state for a more peaceful timer experience.</string>
 	<key>NSUserNotificationsUsageDescription</key>
 	<string>ZenTimer sends notifications when your timer completes, especially when the app is in the background or your screen is locked, so you never miss the end of your meditation session.</string>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>background-processing</string>
-		<string>background-app-refresh</string>
-	</array>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
 </dict>
