@@ -2,8 +2,9 @@ import SwiftUI
 import Foundation
 
 struct TimerView: View {
-    @StateObject private var viewModel = TimerViewModel()
+    @EnvironmentObject private var viewModel: TimerViewModel
     @State private var showingSettings = false
+    @Environment(\.scenePhase) var scenePhase
     
     var body: some View {
         GeometryReader { geometry in
@@ -104,6 +105,12 @@ struct TimerView: View {
         }
         .sheet(isPresented: $showingSettings) {
             SimpleSettingsView()
+        }
+        .onChange(of: scenePhase) { newPhase in
+            if newPhase == .active {
+                // Restore timer state when app becomes active
+                viewModel.restoreTimerStateIfNeeded()
+            }
         }
     }
 }
