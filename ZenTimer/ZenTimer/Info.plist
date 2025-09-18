@@ -26,13 +26,6 @@
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 	</array>
-	<key>UISupportedInterfaceOrientations~ipad</key>
-	<array>
-		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationPortraitUpsideDown</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
-	</array>
 	<key>NSFocusStatusUsageDescription</key>
 	<string>ZenTimer uses Focus status to provide enhanced Do Not Disturb functionality and respect your current focus state for a more peaceful timer experience.</string>
 	<key>NSUserNotificationsUsageDescription</key>
