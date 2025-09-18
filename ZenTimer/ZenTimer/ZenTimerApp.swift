@@ -28,6 +28,8 @@ struct ZenTimerApp: App {
             }
             .animation(.easeInOut(duration: 0.5), value: showSplash)
             .onAppear {
+                // Check for testing reset flag
+                handleTestingArguments()
                 setupNotifications()
                 // Show splash screen for 1 second
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
@@ -36,6 +38,26 @@ struct ZenTimerApp: App {
                     }
                 }
             }
+        }
+    }
+
+    private func handleTestingArguments() {
+        // Check if app was launched with reset flag for UI testing
+        if CommandLine.arguments.contains("--reset-for-testing") {
+            print("🧪 UI Testing mode detected - resetting app state")
+            // Clear all UserDefaults data
+            let userDefaults = UserDefaults.standard
+            let dictionary = userDefaults.dictionaryRepresentation()
+            dictionary.keys.forEach { key in
+                userDefaults.removeObject(forKey: key)
+            }
+            userDefaults.synchronize()
+
+            // Clear all notifications
+            UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+            UNUserNotificationCenter.current().removeAllDeliveredNotifications()
+
+            print("🗑️ All app data cleared for testing")
         }
     }
 

@@ -22,6 +22,8 @@ struct ControlButtons: View {
                     )
                     .clipShape(Circle())
             }
+            .accessibilityIdentifier(viewModel.isRunning ? "pause.fill" : "play.fill")
+            .accessibilityLabel(viewModel.isRunning ? "Pause" : "Play")
             .scaleEffect(viewModel.isRunning ? 1.05 : 1.0)
             .animation(.easeOut(duration: 0.2), value: viewModel.isRunning)
             
@@ -42,6 +44,8 @@ struct ControlButtons: View {
                     )
                     .clipShape(Circle())
             }
+            .accessibilityIdentifier("arrow.clockwise")
+            .accessibilityLabel("Reset")
         }
     }
 }
@@ -138,8 +142,25 @@ struct NotificationToggleButton: View {
                         .stroke(.white.opacity(0.2), lineWidth: 1)
                 )
         }
+        .accessibilityIdentifier(icon)
+        .accessibilityLabel(accessibilityLabelForIcon(icon))
         .scaleEffect(isEnabled ? 1.05 : 1.0)
         .animation(.easeOut(duration: 0.2), value: isEnabled)
+    }
+
+    private func accessibilityLabelForIcon(_ icon: String) -> String {
+        switch icon {
+        case "flashlight.on.fill":
+            return "Flash"
+        case "iphone.radiowaves.left.and.right":
+            return "Vibration"
+        case "speaker.wave.1.fill":
+            return "Sound"
+        case "moon.fill":
+            return "Do Not Disturb"
+        default:
+            return "Toggle"
+        }
     }
 }
 

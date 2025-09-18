@@ -96,6 +96,8 @@ struct TimerView: View {
                                         .stroke(.white.opacity(0.2), lineWidth: 1)
                                 )
                         }
+                        .accessibilityIdentifier("gearshape.fill")
+                        .accessibilityLabel("Settings")
                         .padding(.top, 60)
                         .padding(.trailing, 20)
                     }
