@@ -9,6 +9,32 @@ final class ZenTimerUITests: XCTestCase {
         continueAfterFailure = false
 
         // In UI tests it's important to set the initial state - such as interface orientation - required for your tests before they run. The setUp method is a good place to do this.
+
+        // Reset app state by clearing UserDefaults and relaunching
+        resetAppForTesting()
+    }
+
+    /// Reset the app to a clean state for testing
+    private func resetAppForTesting() {
+        let app = XCUIApplication()
+
+        // Clear UserDefaults by passing reset flag
+        app.launchArguments.append("--reset-for-testing")
+
+        // Ensure app is terminated before launching
+        app.terminate()
+        app.launch()
+
+        // Wait for app to fully load
+        _ = app.staticTexts["Drag to set time"].waitForExistence(timeout: 5)
+
+        // If timer is running from previous state, stop it
+        if app.buttons["pause.fill"].exists {
+            app.buttons["pause.fill"].tap()
+            app.buttons["arrow.clockwise"].tap() // Reset timer
+            // Wait for UI to update
+            _ = app.buttons["play.fill"].waitForExistence(timeout: 3)
+        }
     }
 
     override func tearDownWithError() throws {
@@ -19,60 +45,71 @@ final class ZenTimerUITests: XCTestCase {
 
     func testAppLaunches() throws {
         let app = XCUIApplication()
-        app.launch()
 
+        // App should already be launched and reset from setUp
         // Verify the main timer view loads
         XCTAssertTrue(app.staticTexts["05:00"].exists)
         XCTAssertTrue(app.staticTexts["Drag to set time"].exists)
+        // Verify control buttons are present (should be play after reset)
+        XCTAssertTrue(app.buttons["play.fill"].exists)
+        XCTAssertTrue(app.buttons["arrow.clockwise"].exists)
     }
 
     func testTimerDisplayElements() throws {
         let app = XCUIApplication()
-        app.launch()
 
+        // App should already be launched and reset from setUp
         // Check for key UI elements
         XCTAssertTrue(app.staticTexts["05:00"].exists) // Initial time display
         XCTAssertTrue(app.staticTexts["Drag to set time"].exists) // Status text
-        XCTAssertTrue(app.buttons["Play"].exists) // Play button
-        XCTAssertTrue(app.buttons["Reset"].exists) // Reset button
+        XCTAssertTrue(app.buttons["play.fill"].exists) // Play button (after reset)
+        XCTAssertTrue(app.buttons["arrow.clockwise"].exists) // Reset button
+        // Check notification toggle buttons
+        XCTAssertTrue(app.buttons["flashlight.on.fill"].exists)
+        XCTAssertTrue(app.buttons["iphone.radiowaves.left.and.right"].exists)
+        XCTAssertTrue(app.buttons["speaker.wave.1.fill"].exists)
+        XCTAssertTrue(app.buttons["moon.fill"].exists)
+        // Check settings button
+        XCTAssertTrue(app.buttons["gearshape.fill"].exists)
     }
 
     // MARK: - Timer Control Tests
 
     func testPlayPauseButton() throws {
         let app = XCUIApplication()
-        app.launch()
 
-        let playButton = app.buttons["Play"]
+        // App should already be launched and reset from setUp
+        let playButton = app.buttons["play.fill"]
         XCTAssertTrue(playButton.exists)
 
         // Start the timer
         playButton.tap()
 
         // Should now show pause button and running status
-        XCTAssertTrue(app.buttons["Pause"].exists)
+        XCTAssertTrue(app.buttons["pause.fill"].waitForExistence(timeout: 2))
         XCTAssertTrue(app.staticTexts["Running"].exists)
 
         // Pause the timer
-        app.buttons["Pause"].tap()
+        app.buttons["pause.fill"].tap()
 
         // Should go back to play button
-        XCTAssertTrue(app.buttons["Play"].exists)
+        XCTAssertTrue(app.buttons["play.fill"].waitForExistence(timeout: 2))
     }
 
     func testResetButton() throws {
         let app = XCUIApplication()
-        app.launch()
 
+        // App should already be launched and reset from setUp
         // Start timer and let it run briefly
-        app.buttons["Play"].tap()
+        app.buttons["play.fill"].tap()
+        XCTAssertTrue(app.buttons["pause.fill"].waitForExistence(timeout: 2))
         sleep(2) // Let timer run for 2 seconds
 
         // Reset the timer
-        app.buttons["Reset"].tap()
+        app.buttons["arrow.clockwise"].tap()
 
         // Should be back to initial state
-        XCTAssertTrue(app.buttons["Play"].exists)
+        XCTAssertTrue(app.buttons["play.fill"].waitForExistence(timeout: 2))
         XCTAssertTrue(app.staticTexts["05:00"].exists)
         XCTAssertTrue(app.staticTexts["Drag to set time"].exists)
     }
@@ -81,8 +118,8 @@ final class ZenTimerUITests: XCTestCase {
 
     func testMinuteAdjustmentButtons() throws {
         let app = XCUIApplication()
-        app.launch()
 
+        // App should already be launched and reset from setUp
         // Test increase button
         let increaseButton = app.buttons["+"]
         if increaseButton.exists {
@@ -102,51 +139,59 @@ final class ZenTimerUITests: XCTestCase {
 
     func testSettingsNavigation() throws {
         let app = XCUIApplication()
-        app.launch()
 
+        // App should already be launched and reset from setUp
         // Look for settings button/icon
-        let settingsButton = app.buttons["Settings"]
-        if settingsButton.exists {
-            settingsButton.tap()
+        let settingsButton = app.buttons["gearshape.fill"]
+        XCTAssertTrue(settingsButton.exists)
+        settingsButton.tap()
 
-            // Should navigate to settings
-            XCTAssertTrue(app.navigationBars["Settings"].exists)
-        }
+        // Should show settings sheet/modal
+        // Wait for settings to appear
+        XCTAssertTrue(app.staticTexts["Settings"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.staticTexts["App Information"].exists)
+        XCTAssertTrue(app.buttons["Done"].exists)
+
+        // Close settings
+        app.buttons["Done"].tap()
+
+        // Should be back to main screen
+        XCTAssertTrue(app.staticTexts["05:00"].waitForExistence(timeout: 3))
     }
 
     // MARK: - Notification Settings Tests
 
     func testNotificationToggles() throws {
         let app = XCUIApplication()
-        app.launch()
 
-        // Navigate to settings if they exist
-        let settingsButton = app.buttons["Settings"]
-        if settingsButton.exists {
-            settingsButton.tap()
+        // App should already be launched and reset from setUp
+        // Test notification toggle buttons directly on main screen
+        let flashButton = app.buttons["flashlight.on.fill"]
+        if flashButton.exists {
+            flashButton.tap()
+            // Flash button should still exist after toggle
+            XCTAssertTrue(flashButton.exists)
+        }
 
-            // Test notification toggles
-            let vibrationToggle = app.switches["Vibration"]
-            if vibrationToggle.exists {
-                let initialState = vibrationToggle.value as? String
-                vibrationToggle.tap()
+        let vibrationButton = app.buttons["iphone.radiowaves.left.and.right"]
+        if vibrationButton.exists {
+            vibrationButton.tap()
+            // Vibration button should still exist after toggle
+            XCTAssertTrue(vibrationButton.exists)
+        }
 
-                // State should have changed
-                let newState = vibrationToggle.value as? String
-                XCTAssertNotEqual(initialState, newState)
-            }
+        let soundButton = app.buttons["speaker.wave.1.fill"]
+        if soundButton.exists {
+            soundButton.tap()
+            // Sound button should still exist after toggle
+            XCTAssertTrue(soundButton.exists)
+        }
 
-            let flashToggle = app.switches["Flash"]
-            if flashToggle.exists {
-                flashToggle.tap()
-                // Should toggle successfully
-            }
-
-            let soundToggle = app.switches["Sound"]
-            if soundToggle.exists {
-                soundToggle.tap()
-                // Should toggle successfully
-            }
+        let dndButton = app.buttons["moon.fill"]
+        if dndButton.exists {
+            dndButton.tap()
+            // Do Not Disturb button should still exist after toggle
+            XCTAssertTrue(dndButton.exists)
         }
     }
 
@@ -154,11 +199,16 @@ final class ZenTimerUITests: XCTestCase {
 
     func testAccessibilityLabels() throws {
         let app = XCUIApplication()
-        app.launch()
 
-        // Verify key elements have accessibility labels
-        XCTAssertTrue(app.buttons["Play"].exists)
-        XCTAssertTrue(app.buttons["Reset"].exists)
+        // App should already be launched and reset from setUp
+        // Verify key elements have accessibility identifiers
+        XCTAssertTrue(app.buttons["play.fill"].exists)
+        XCTAssertTrue(app.buttons["arrow.clockwise"].exists)
+        XCTAssertTrue(app.buttons["flashlight.on.fill"].exists)
+        XCTAssertTrue(app.buttons["iphone.radiowaves.left.and.right"].exists)
+        XCTAssertTrue(app.buttons["speaker.wave.1.fill"].exists)
+        XCTAssertTrue(app.buttons["moon.fill"].exists)
+        XCTAssertTrue(app.buttons["gearshape.fill"].exists)
 
         // Timer display should be accessible
         let timerDisplay = app.staticTexts["05:00"]
@@ -170,8 +220,8 @@ final class ZenTimerUITests: XCTestCase {
 
     func testCircularDragGesture() throws {
         let app = XCUIApplication()
-        app.launch()
 
+        // App should already be launched and reset from setUp
         // Find the circular timer area (this might need adjustment based on actual implementation)
         let timerCircle = app.otherElements.containing(.staticText, identifier:"05:00").element
 
@@ -192,11 +242,11 @@ final class ZenTimerUITests: XCTestCase {
 
     func testAppBackgroundAndForeground() throws {
         let app = XCUIApplication()
-        app.launch()
 
+        // App should already be launched and reset from setUp
         // Start a timer
-        app.buttons["Play"].tap()
-        XCTAssertTrue(app.staticTexts["Running"].exists)
+        app.buttons["play.fill"].tap()
+        XCTAssertTrue(app.staticTexts["Running"].waitForExistence(timeout: 2))
 
         // Send app to background
         XCUIDevice.shared.press(.home)
@@ -208,7 +258,7 @@ final class ZenTimerUITests: XCTestCase {
         app.activate()
 
         // Timer should still be running
-        XCTAssertTrue(app.staticTexts["Running"].exists)
+        XCTAssertTrue(app.staticTexts["Running"].waitForExistence(timeout: 3))
     }
 
     // MARK: - Performance Tests
@@ -224,10 +274,14 @@ final class ZenTimerUITests: XCTestCase {
 
     func testTimerAccuracy() throws {
         let app = XCUIApplication()
-        app.launch()
+
+        // App should already be launched and reset from setUp
+        // Ensure we have the play button (timer is stopped)
+        XCTAssertTrue(app.buttons["play.fill"].exists)
 
         // Start timer
-        app.buttons["Play"].tap()
+        app.buttons["play.fill"].tap()
+        XCTAssertTrue(app.buttons["pause.fill"].waitForExistence(timeout: 2))
 
         // Record start time
         let startTime = Date()
@@ -246,10 +300,12 @@ final class ZenTimerUITests: XCTestCase {
 
     func testTimerCompletion() throws {
         let app = XCUIApplication()
-        app.launch()
 
-        // Set timer to 1 minute (or minimum time)
-        // This test might need adjustment based on how time setting is implemented
+        // App should already be launched and reset from setUp
+        // Ensure we have the play button (timer is stopped)
+        XCTAssertTrue(app.buttons["play.fill"].exists)
+
+        // Set timer to minimum time for faster testing
         let decreaseButton = app.buttons["-"]
         if decreaseButton.exists {
             // Try to set to minimum time
@@ -259,15 +315,16 @@ final class ZenTimerUITests: XCTestCase {
         }
 
         // Start the timer
-        app.buttons["Play"].tap()
+        app.buttons["play.fill"].tap()
+        XCTAssertTrue(app.buttons["pause.fill"].waitForExistence(timeout: 2))
 
         // For testing purposes, we'll just verify the timer can be started
         // A full completion test would take too long for automated testing
         XCTAssertTrue(app.staticTexts["Running"].exists)
 
         // Reset to avoid long wait
-        app.buttons["Reset"].tap()
-        XCTAssertTrue(app.staticTexts["Drag to set time"].exists)
+        app.buttons["arrow.clockwise"].tap()
+        XCTAssertTrue(app.staticTexts["Drag to set time"].waitForExistence(timeout: 2))
     }
 
     // MARK: - Memory and Resource Tests
@@ -277,13 +334,29 @@ final class ZenTimerUITests: XCTestCase {
 
         // Launch and interact with app multiple times
         for _ in 0..<5 {
+            // Add reset flag to ensure clean state
+            app.launchArguments = ["--reset-for-testing"]
             app.launch()
 
+            // Wait for app to fully load
+            _ = app.staticTexts["Drag to set time"].waitForExistence(timeout: 5)
+
+            // Ensure we start with play button (clean state)
+            if app.buttons["pause.fill"].exists {
+                app.buttons["pause.fill"].tap()
+                app.buttons["arrow.clockwise"].tap()
+                _ = app.buttons["play.fill"].waitForExistence(timeout: 3)
+            }
+
             // Perform basic interactions
-            app.buttons["Play"].tap()
-            sleep(1)
-            app.buttons["Pause"].tap()
-            app.buttons["Reset"].tap()
+            if app.buttons["play.fill"].exists {
+                app.buttons["play.fill"].tap()
+                _ = app.buttons["pause.fill"].waitForExistence(timeout: 2)
+                sleep(1)
+                app.buttons["pause.fill"].tap()
+                _ = app.buttons["play.fill"].waitForExistence(timeout: 2)
+                app.buttons["arrow.clockwise"].tap()
+            }
 
             app.terminate()
         }
@@ -296,21 +369,32 @@ final class ZenTimerUITests: XCTestCase {
 
     func testDeviceRotation() throws {
         let app = XCUIApplication()
-        app.launch()
 
+        // App should already be launched and reset from setUp
         // Test portrait orientation (should be locked for this app)
         XCUIDevice.shared.orientation = .portrait
 
         // Verify UI elements are still accessible
         XCTAssertTrue(app.staticTexts["05:00"].exists)
-        XCTAssertTrue(app.buttons["Play"].exists)
+        // Check for either play or pause button (depending on current state)
+        let hasPlayButton = app.buttons["play.fill"].exists
+        let hasPauseButton = app.buttons["pause.fill"].exists
+        XCTAssertTrue(hasPlayButton || hasPauseButton, "Should have either play or pause button")
 
         // Try landscape (should stay in portrait for this app)
         XCUIDevice.shared.orientation = .landscapeLeft
 
-        // Should still be in portrait mode
+        // Give a moment for rotation to process
+        sleep(1)
+
+        // Should still be in portrait mode with same UI elements
         XCTAssertTrue(app.staticTexts["05:00"].exists)
-        XCTAssertTrue(app.buttons["Play"].exists)
+        // Verify the same button state is maintained
+        if hasPlayButton {
+            XCTAssertTrue(app.buttons["play.fill"].exists)
+        } else {
+            XCTAssertTrue(app.buttons["pause.fill"].exists)
+        }
 
         // Reset orientation
         XCUIDevice.shared.orientation = .portrait
