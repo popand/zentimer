@@ -14,9 +14,9 @@
 		AA0000009 /* CircularProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000010 /* CircularProgressView.swift */; };
 		AA0000011 /* ControlButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000012 /* ControlButtons.swift */; };
 		AA0000013 /* DragGestureHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000014 /* DragGestureHandler.swift */; };
-		AA0000036 /* SplashScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000037 /* SplashScreenView.swift */; };
 		AA0000033 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA0000030 /* Assets.xcassets */; };
 		AA0000034 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA0000035 /* LaunchScreen.storyboard */; };
+		AA0000036 /* Views/SplashScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000037 /* Views/SplashScreenView.swift */; };
 		C99E46592E73582500A55912 /* HelpSupportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99E46552E73582500A55912 /* HelpSupportView.swift */; };
 		C99E465A2E73582500A55912 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99E46572E73582500A55912 /* SettingsView.swift */; };
 		C99E465B2E73582500A55912 /* PrivacyPolicyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99E46562E73582500A55912 /* PrivacyPolicyView.swift */; };
@@ -35,7 +35,7 @@
 		AA0000030 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AA0000031 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AA0000035 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
-		AA0000037 /* SplashScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Views/SplashScreenView.swift"; sourceTree = "<group>"; };
+		AA0000037 /* Views/SplashScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/SplashScreenView.swift; sourceTree = "<group>"; };
 		C99E46552E73582500A55912 /* HelpSupportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpSupportView.swift; sourceTree = "<group>"; };
 		C99E46562E73582500A55912 /* PrivacyPolicyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPolicyView.swift; sourceTree = "<group>"; };
 		C99E46572E73582500A55912 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -59,7 +59,7 @@
 				AA0000002 /* ZenTimerApp.swift */,
 				AA0000004 /* ContentView.swift */,
 				AA0000006 /* TimerView.swift */,
-				AA0000037 /* SplashScreenView.swift */,
+				AA0000037 /* Views/SplashScreenView.swift */,
 				C99E46552E73582500A55912 /* HelpSupportView.swift */,
 				C99E46562E73582500A55912 /* PrivacyPolicyView.swift */,
 				C99E46572E73582500A55912 /* SettingsView.swift */,
@@ -172,7 +172,7 @@
 				AA0000009 /* CircularProgressView.swift in Sources */,
 				AA0000011 /* ControlButtons.swift in Sources */,
 				AA0000013 /* DragGestureHandler.swift in Sources */,
-				AA0000036 /* SplashScreenView.swift in Sources */,
+				AA0000036 /* Views/SplashScreenView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -312,7 +312,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = ZenTimer/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Zen Timer";
+				INFOPLIST_KEY_CFBundleDisplayName = ZenTimer;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -343,7 +343,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = ZenTimer/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Zen Timer";
+				INFOPLIST_KEY_CFBundleDisplayName = ZenTimer;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
