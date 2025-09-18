@@ -6,21 +6,36 @@ struct ZenTimerApp: App {
     @Environment(\.scenePhase) var scenePhase
     @StateObject private var timerViewModel = TimerViewModel()
     @StateObject private var notificationDelegate = NotificationDelegate()
+    @State private var showSplash = false // Temporarily disabled for testing
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environmentObject(timerViewModel)
-                .preferredColorScheme(.light)
-                .onChange(of: scenePhase) { newPhase in
-                    handleScenePhaseChange(newPhase)
+            ZStack {
+                if showSplash {
+                    SplashScreenView()
+                        .transition(.opacity)
+                } else {
+                    ContentView()
+                        .environmentObject(timerViewModel)
+                        .preferredColorScheme(.light)
+                        .onChange(of: scenePhase) { newPhase in
+                            handleScenePhaseChange(newPhase)
+                        }
+                        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willTerminateNotification)) { _ in
+                            timerViewModel.handleAppWillTerminate()
+                        }
                 }
-                .onReceive(NotificationCenter.default.publisher(for: UIApplication.willTerminateNotification)) { _ in
-                    timerViewModel.handleAppWillTerminate()
+            }
+            .animation(.easeInOut(duration: 0.5), value: showSplash)
+            .onAppear {
+                setupNotifications()
+                // Show splash screen for 1 second
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    withAnimation {
+                        showSplash = false
+                    }
                 }
-                .onAppear {
-                    setupNotifications()
-                }
+            }
         }
     }
 
