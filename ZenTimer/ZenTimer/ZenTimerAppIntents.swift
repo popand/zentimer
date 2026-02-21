@@ -52,8 +52,8 @@ struct ZenTimerShortcuts: AppShortcutsProvider {
             intent: StartMeditationIntent(),
             phrases: [
                 "Start meditation in \(.applicationName)",
-                "Begin meditation timer",
-                "Meditate for \(\.$duration) minutes"
+                "Begin meditation timer in \(.applicationName)",
+                "Meditate with \(.applicationName)"
             ],
             shortTitle: "Start Meditation",
             systemImageName: "timer"
@@ -63,7 +63,7 @@ struct ZenTimerShortcuts: AppShortcutsProvider {
             intent: StopMeditationIntent(),
             phrases: [
                 "Stop meditation in \(.applicationName)",
-                "End meditation timer"
+                "End meditation timer in \(.applicationName)"
             ],
             shortTitle: "Stop Meditation",
             systemImageName: "stop.circle"

@@ -14,6 +14,9 @@ class TimerViewModel: ObservableObject {
     @Published var isDragging: Bool = false
     @Published var dragProgress: Double? = nil
     
+    // Presets
+    @Published var presets: [TimerPreset] = []
+
     // Notification preferences
     @Published var flashEnabled: Bool = false
     @Published var vibrationEnabled: Bool = true
@@ -26,7 +29,7 @@ class TimerViewModel: ObservableObject {
     
     private var timer: Timer?
     private var messageTimer: Timer?
-    private var timerEndDate: Date?
+    private(set) var timerEndDate: Date?
     private let userDefaults = UserDefaults.standard
 
     // Constants for UserDefaults keys
@@ -39,17 +42,21 @@ class TimerViewModel: ObservableObject {
         static let soundEnabled = "soundEnabled"
         static let doNotDisturbEnabled = "doNotDisturbEnabled"
         static let appVersion = "appVersion"
+        static let presets = "timerPresets"
     }
     
     init() {
-        // Load saved preferences first
+        // Load saved preferences and presets first
         loadUserPreferences()
+        loadPresets()
         // Request notification permissions on initialization
         requestNotificationPermissions()
         // Restore timer state if app was terminated while timer was running
         restoreTimerStateIfNeeded()
         // Setup app lifecycle observers
         setupAppLifecycleObservers()
+        // Setup App Intents observers for Siri/Shortcuts integration
+        setupAppIntentsObservers()
     }
     
     var progress: Double {
@@ -144,6 +151,9 @@ class TimerViewModel: ObservableObject {
         // Schedule a local notification for timer completion
         scheduleTimerCompletionNotification()
 
+        // Start Live Activity for Dynamic Island and Lock Screen
+        startLiveActivity()
+
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             guard let self = self else { return }
 
@@ -168,6 +178,7 @@ class TimerViewModel: ObservableObject {
         timerEndDate = nil
         clearTimerState()
         cancelTimerNotification()
+        endLiveActivity()
     }
 
     private func completeTimer() {
@@ -176,6 +187,7 @@ class TimerViewModel: ObservableObject {
         timer = nil
         timerEndDate = nil
         clearTimerState() // Still clear state since timer is done
+        endLiveActivity()
         // Don't cancel notification - let it fire naturally
         triggerNotifications() // Trigger foreground notifications if app is active
     }
@@ -434,16 +446,14 @@ class TimerViewModel: ObservableObject {
     }
     
     private func checkSystemFocusStatus() {
-        // Check if system Focus mode is active (iOS 15+)
-        if #available(iOS 15.0, *) {
-            let focusStatus = INFocusStatusCenter.default.focusStatus
-            if focusStatus.isFocused == true {
-                print("🎯 System Focus mode is active")
-                // When system Focus is active, we can be extra quiet
-                suppressAllNotifications()
-            } else {
-                print("🎯 System Focus mode is not active")
-            }
+        // Check if system Focus mode is active
+        let focusStatus = INFocusStatusCenter.default.focusStatus
+        if focusStatus.isFocused == true {
+            print("🎯 System Focus mode is active")
+            // When system Focus is active, we can be extra quiet
+            suppressAllNotifications()
+        } else {
+            print("🎯 System Focus mode is not active")
         }
     }
     
@@ -468,12 +478,10 @@ class TimerViewModel: ObservableObject {
     private func shouldTriggerNotifications() -> Bool {
         if doNotDisturbEnabled {
             // Check if system Focus is active
-            if #available(iOS 15.0, *) {
-                let focusStatus = INFocusStatusCenter.default.focusStatus
-                if focusStatus.isFocused == true {
-                    // System Focus is active, be completely silent
-                    return false
-                }
+            let focusStatus = INFocusStatusCenter.default.focusStatus
+            if focusStatus.isFocused == true {
+                // System Focus is active, be completely silent
+                return false
             }
             // App-level DND is on, only allow vibration (most gentle)
             return false
@@ -540,6 +548,9 @@ class TimerViewModel: ObservableObject {
             totalSeconds = savedTotalSeconds > 0 ? savedTotalSeconds : remainingTime
             minutes = max(1, (totalSeconds + 59) / 60) // Round up, minimum 1
             isRunning = true
+
+            // Start Live Activity for restored timer
+            startLiveActivity()
 
             // Start the timer without calling startTimer() to avoid double-saving state
             timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
@@ -629,11 +640,9 @@ class TimerViewModel: ObservableObject {
             content.sound = .default
         }
 
-        // Add notification relevance score for iOS 15+ to ensure prominence
-        if #available(iOS 15.0, *) {
-            content.relevanceScore = 1.0 // Maximum relevance
-            content.interruptionLevel = soundEnabled ? .critical : .active
-        }
+        // Add notification relevance score to ensure prominence
+        content.relevanceScore = 1.0 // Maximum relevance
+        content.interruptionLevel = soundEnabled ? .critical : .active
 
         // Add custom user info for debugging
         content.userInfo = [
@@ -777,10 +786,44 @@ class TimerViewModel: ObservableObject {
     /// Clear the app badge number and remove delivered notifications
     func clearAppBadge() {
         DispatchQueue.main.async {
-            UIApplication.shared.applicationIconBadgeNumber = 0
+            UNUserNotificationCenter.current().setBadgeCount(0)
             // Also clear delivered notifications to clean up notification center
             UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: ["timer.completion"])
             print("🔢 App badge cleared and delivered timer notifications removed")
+        }
+    }
+
+    // MARK: - Preset Management
+
+    private func loadPresets() {
+        guard let data = userDefaults.data(forKey: UserDefaultsKeys.presets),
+              let decoded = try? JSONDecoder().decode([TimerPreset].self, from: data) else {
+            presets = TimerPreset.defaults
+            return
+        }
+        presets = decoded
+    }
+
+    private func savePresets() {
+        if let data = try? JSONEncoder().encode(presets) {
+            userDefaults.set(data, forKey: UserDefaultsKeys.presets)
+        }
+    }
+
+    func addPreset(_ preset: TimerPreset) {
+        presets.append(preset)
+        savePresets()
+    }
+
+    func deletePreset(id: UUID) {
+        presets.removeAll { $0.id == id }
+        savePresets()
+    }
+
+    func updatePreset(_ preset: TimerPreset) {
+        if let index = presets.firstIndex(where: { $0.id == preset.id }) {
+            presets[index] = preset
+            savePresets()
         }
     }
 

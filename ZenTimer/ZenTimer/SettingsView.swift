@@ -3,12 +3,13 @@ import SwiftUI
 struct SimpleSettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var viewModel: TimerViewModel
+    @State private var showingPresetCustomization = false
     @State private var showingHelpSupport = false
     @State private var showingPrivacyPolicy = false
     @State private var showingTermsOfService = false
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ZStack {
                 LinearGradient(
                     gradient: Gradient(colors: [
@@ -62,6 +63,39 @@ struct SimpleSettingsView: View {
                             .foregroundColor(.white)
                         
                         VStack(spacing: 0) {
+                            // Customize Presets
+                            Button(action: {
+                                showingPresetCustomization = true
+                            }) {
+                                HStack {
+                                    Circle()
+                                        .fill(.orange)
+                                        .frame(width: 32, height: 32)
+                                        .overlay(
+                                            Image(systemName: "slider.horizontal.3")
+                                                .font(.system(size: 14))
+                                                .foregroundColor(.white)
+                                        )
+
+                                    Text("Customize Presets")
+                                        .font(.system(size: 16, weight: .medium))
+                                        .foregroundColor(.white)
+
+                                    Spacer()
+
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 14, weight: .medium))
+                                        .foregroundColor(.white.opacity(0.5))
+                                }
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 16)
+                            }
+                            .buttonStyle(PlainButtonStyle())
+
+                            Divider()
+                                .background(.white.opacity(0.2))
+                                .padding(.leading, 64)
+
                             // Help & Support
                             Button(action: {
                                 showingHelpSupport = true
@@ -164,7 +198,7 @@ struct SimpleSettingsView: View {
                     Spacer()
                     
                     // Copyright Notice
-                    Text("© 2025 ZenTimer. All rights reserved.")
+                    Text("© 2026 ZenTimer. All rights reserved.")
                         .font(.system(size: 12, weight: .regular))
                         .foregroundColor(.white.opacity(0.6))
                     .padding(.bottom, 20)
@@ -181,6 +215,10 @@ struct SimpleSettingsView: View {
                     .font(.system(size: 16, weight: .medium))
                 }
             }
+        }
+        .sheet(isPresented: $showingPresetCustomization) {
+            PresetCustomizationView()
+                .environmentObject(viewModel)
         }
         .sheet(isPresented: $showingHelpSupport) {
             HelpSupportView()

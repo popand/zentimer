@@ -64,6 +64,12 @@ struct TimerView: View {
                     }
                     .frame(width: 320, height: 320)
                     
+                    // Timer Presets (hidden while running)
+                    if !viewModel.isRunning {
+                        TimerPresetsView(viewModel: viewModel)
+                            .padding(.horizontal, 20)
+                    }
+
                     // Control Buttons
                     ControlButtons(viewModel: viewModel)
                     
@@ -111,7 +117,7 @@ struct TimerView: View {
         .sheet(isPresented: $showingSettings) {
             SimpleSettingsView()
         }
-        .onChange(of: scenePhase) { newPhase in
+        .onChange(of: scenePhase) { _, newPhase in
             if newPhase == .active {
                 // Restore timer state when app becomes active
                 viewModel.restoreTimerStateIfNeeded()

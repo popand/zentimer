@@ -26,11 +26,12 @@ extension TimerViewModel {
             endTime: endDate,
             totalMinutes: minutes
         )
-        
+        let content = ActivityContent(state: contentState, staleDate: nil)
+
         do {
             let activity = try Activity<TimerActivityAttributes>.request(
                 attributes: attributes,
-                contentState: contentState,
+                content: content,
                 pushType: nil
             )
             print("✅ Live Activity started: \(activity.id)")
@@ -42,7 +43,7 @@ extension TimerViewModel {
     func endLiveActivity() {
         Task {
             for activity in Activity<TimerActivityAttributes>.activities {
-                await activity.end(dismissalPolicy: .immediate)
+                await activity.end(nil, dismissalPolicy: .immediate)
             }
         }
     }

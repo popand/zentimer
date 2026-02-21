@@ -6,7 +6,7 @@ struct ZenTimerApp: App {
     @Environment(\.scenePhase) var scenePhase
     @StateObject private var timerViewModel = TimerViewModel()
     @StateObject private var notificationDelegate = NotificationDelegate()
-    @State private var showSplash = false // Temporarily disabled for testing
+    @State private var showSplash = true
 
     var body: some Scene {
         WindowGroup {
@@ -18,7 +18,7 @@ struct ZenTimerApp: App {
                     ContentView()
                         .environmentObject(timerViewModel)
                         .preferredColorScheme(.light)
-                        .onChange(of: scenePhase) { newPhase in
+                        .onChange(of: scenePhase) { _, newPhase in
                             handleScenePhaseChange(newPhase)
                         }
                         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willTerminateNotification)) { _ in
@@ -127,11 +127,7 @@ class NotificationDelegate: NSObject, ObservableObject, UNUserNotificationCenter
         if notification.request.identifier == "timer.completion" {
             // For timer completion, always show full notification even in foreground
             // This ensures consistent behavior regardless of app state
-            if #available(iOS 14.0, *) {
-                completionHandler([.banner, .list, .sound, .badge])
-            } else {
-                completionHandler([.alert, .sound, .badge])
-            }
+            completionHandler([.banner, .list, .sound, .badge])
             print("   🔔 Displaying full timer completion notification in foreground")
         } else {
             // For other notifications, use default behavior

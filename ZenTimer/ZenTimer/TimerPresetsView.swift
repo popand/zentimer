@@ -1,25 +1,55 @@
 import SwiftUI
 
+struct TimerPreset: Identifiable, Codable {
+    var id: UUID
+    var name: String
+    var minutes: Int
+    var icon: String
+    var colorName: String
+
+    var color: Color {
+        switch colorName {
+        case "green": return .green
+        case "blue": return .blue
+        case "purple": return .purple
+        case "orange": return .orange
+        case "red": return .red
+        case "pink": return .pink
+        case "yellow": return .yellow
+        case "teal": return .teal
+        default: return .blue
+        }
+    }
+
+    init(id: UUID = UUID(), name: String, minutes: Int, icon: String, colorName: String) {
+        self.id = id
+        self.name = name
+        self.minutes = minutes
+        self.icon = icon
+        self.colorName = colorName
+    }
+
+    static let defaults: [TimerPreset] = [
+        TimerPreset(name: "Quick Focus", minutes: 5, icon: "leaf.fill", colorName: "green"),
+        TimerPreset(name: "Standard", minutes: 10, icon: "moon.fill", colorName: "blue"),
+        TimerPreset(name: "Deep Session", minutes: 20, icon: "sparkles", colorName: "purple"),
+        TimerPreset(name: "Extended", minutes: 30, icon: "star.fill", colorName: "orange")
+    ]
+}
+
 struct TimerPresetsView: View {
     @ObservedObject var viewModel: TimerViewModel
-    
-    let presets = [
-        TimerPreset(name: "Quick Focus", minutes: 5, icon: "leaf.fill", color: Color.green),
-        TimerPreset(name: "Standard", minutes: 10, icon: "moon.fill", color: Color.blue),
-        TimerPreset(name: "Deep Session", minutes: 20, icon: "sparkles", color: Color.purple),
-        TimerPreset(name: "Extended", minutes: 30, icon: "star.fill", color: Color.orange)
-    ]
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Quick Start")
                 .font(.caption)
                 .foregroundColor(.white.opacity(0.7))
                 .padding(.leading, 4)
-            
+
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
-                    ForEach(presets) { preset in
+                    ForEach(viewModel.presets) { preset in
                         PresetButton(preset: preset, viewModel: viewModel)
                     }
                 }
@@ -28,18 +58,10 @@ struct TimerPresetsView: View {
     }
 }
 
-struct TimerPreset: Identifiable {
-    let id = UUID()
-    let name: String
-    let minutes: Int
-    let icon: String
-    let color: Color
-}
-
 struct PresetButton: View {
     let preset: TimerPreset
     @ObservedObject var viewModel: TimerViewModel
-    
+
     var body: some View {
         Button(action: {
             viewModel.setPresetTime(minutes: preset.minutes)
@@ -55,7 +77,7 @@ struct PresetButton: View {
                         Circle()
                             .fill(preset.color.opacity(0.3))
                     )
-                
+
                 VStack(spacing: 2) {
                     Text(preset.name)
                         .font(.caption2)
@@ -83,7 +105,7 @@ struct PresetButton: View {
 extension TimerViewModel {
     func setPresetTime(minutes: Int) {
         guard !isRunning else { return }
-        
+
         self.minutes = minutes
         let newTotal = minutes * 60
         self.totalSeconds = newTotal
