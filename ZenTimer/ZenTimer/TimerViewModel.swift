@@ -72,6 +72,19 @@ class TimerViewModel: ObservableObject {
         return String(format: "%02d:%02d", mins, secs)
     }
     
+    var accessibleTimeDescription: String {
+        let mins = timeLeft / 60
+        let secs = timeLeft % 60
+        
+        if mins > 0 && secs > 0 {
+            return "\(mins) minute\(mins == 1 ? "" : "s") and \(secs) second\(secs == 1 ? "" : "s")"
+        } else if mins > 0 {
+            return "\(mins) minute\(mins == 1 ? "" : "s")"
+        } else {
+            return "\(secs) second\(secs == 1 ? "" : "s")"
+        }
+    }
+    
     var statusText: String {
         if isRunning {
             return "Running"
@@ -255,17 +268,23 @@ class TimerViewModel: ObservableObject {
     }
     
     private func triggerCalmingVibration() {
-        // Gentle, calming vibration pattern
+        // Extended vibration pattern: 3 rounds of triple pulses with pauses between rounds
         DispatchQueue.main.async {
-            let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+            let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
             impactFeedback.prepare()
-            
-            // Create a gentle triple pulse pattern
-            impactFeedback.impactOccurred()
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                impactFeedback.impactOccurred()
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                    impactFeedback.impactOccurred()
+
+            let totalRounds = 3
+            let pulsesPerRound = 3
+            let pulseInterval: TimeInterval = 0.25
+            let roundPause: TimeInterval = 0.6
+
+            for round in 0..<totalRounds {
+                let roundDelay = Double(round) * (Double(pulsesPerRound) * pulseInterval + roundPause)
+                for pulse in 0..<pulsesPerRound {
+                    let pulseDelay = roundDelay + Double(pulse) * pulseInterval
+                    DispatchQueue.main.asyncAfter(deadline: .now() + pulseDelay) {
+                        impactFeedback.impactOccurred()
+                    }
                 }
             }
         }
@@ -273,7 +292,17 @@ class TimerViewModel: ObservableObject {
     
     private func triggerFlash() {
         guard let device = AVCaptureDevice.default(for: .video),
-              device.hasTorch else { return }
+              device.hasTorch,
+              device.isTorchAvailable else {
+            print("⚠️ Torch not available on this device")
+            return
+        }
+        
+        // Check if torch is currently in use
+        guard !device.isTorchActive else {
+            print("⚠️ Torch already active")
+            return
+        }
         
         DispatchQueue.main.async {
             self.performFlashSequence(device: device, flashCount: 0)
@@ -281,15 +310,15 @@ class TimerViewModel: ObservableObject {
     }
     
     private func performFlashSequence(device: AVCaptureDevice, flashCount: Int) {
-        guard flashCount < 3 else { return }
-        
+        guard flashCount < 6 else { return }
+
         do {
             try device.lockForConfiguration()
-            try device.setTorchModeOn(level: 0.5)
+            try device.setTorchModeOn(level: 1.0)
             device.unlockForConfiguration()
-            
-            // Turn off after 150ms
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+
+            // Turn off after 300ms (longer on-time for visibility)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                 do {
                     try device.lockForConfiguration()
                     device.torchMode = .off
@@ -297,9 +326,9 @@ class TimerViewModel: ObservableObject {
                 } catch {
                     print("Flash off error: \(error)")
                 }
-                
-                // Schedule next flash after 400ms total interval
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
+
+                // Schedule next flash after 500ms pause
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     self.performFlashSequence(device: device, flashCount: flashCount + 1)
                 }
             }
@@ -309,9 +338,14 @@ class TimerViewModel: ObservableObject {
     }
     
     private func triggerCalmingSound() {
-        // Play a very gentle, low chime sound
+        // Play a reliable system sound that works across all devices
         DispatchQueue.main.async {
-            AudioServicesPlaySystemSound(1016) // Low power chime
+            // Play the tri-tone alert sound (reliable on all iOS devices)
+            AudioServicesPlayAlertSound(SystemSoundID(1005))
+            // Play a second chime after a short delay for emphasis
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                AudioServicesPlayAlertSound(SystemSoundID(1005))
+            }
         }
     }
     
