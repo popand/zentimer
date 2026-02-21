@@ -44,10 +44,13 @@ struct TimerView: View {
                                     .foregroundColor(.white)
                                     .tracking(4)
                                     .monospacedDigit()
+                                    .accessibilityLabel("Timer: \(viewModel.accessibleTimeDescription)")
+                                    .accessibilityAddTraits(.updatesFrequently)
                                 
                                 Text(viewModel.statusText)
                                     .font(.system(size: 18, weight: .light))
                                     .foregroundColor(.white.opacity(0.8))
+                                    .accessibilityLabel("Status: \(viewModel.statusText)")
                             }
                         }
                         .frame(width: timerGeometry.size.width, height: timerGeometry.size.height)

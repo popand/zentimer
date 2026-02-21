@@ -17,15 +17,31 @@
 		AA0000033 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA0000030 /* Assets.xcassets */; };
 		AA0000034 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA0000035 /* LaunchScreen.storyboard */; };
 		AA0000036 /* Views/SplashScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000037 /* Views/SplashScreenView.swift */; };
+		AA0000050 /* TimerViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000051 /* TimerViewModelTests.swift */; };
+		AA0000052 /* ZenTimerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000053 /* ZenTimerUITests.swift */; };
+		AA0000055 /* ZenTimer.app in Frameworks */ = {isa = PBXBuildFile; fileRef = AA0000015 /* ZenTimer.app */; };
 		C99E46592E73582500A55912 /* HelpSupportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99E46552E73582500A55912 /* HelpSupportView.swift */; };
 		C99E465A2E73582500A55912 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99E46572E73582500A55912 /* SettingsView.swift */; };
 		C99E465B2E73582500A55912 /* PrivacyPolicyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99E46562E73582500A55912 /* PrivacyPolicyView.swift */; };
 		C99E465C2E73582500A55912 /* TermsOfServiceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C99E46582E73582500A55912 /* TermsOfServiceView.swift */; };
-		AA0000050 /* TimerViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000051 /* TimerViewModelTests.swift */; };
-		AA0000052 /* ZenTimerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0000053 /* ZenTimerUITests.swift */; };
-		AA0000054 /* ZenTimer.app in Frameworks */ = {isa = PBXBuildFile; fileRef = AA0000015 /* ZenTimer.app */; };
-		AA0000055 /* ZenTimer.app in Frameworks */ = {isa = PBXBuildFile; fileRef = AA0000015 /* ZenTimer.app */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		AA0000070 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA0000023 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AA0000020;
+			remoteInfo = ZenTimer;
+		};
+		AA0000071 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA0000023 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AA0000020;
+			remoteInfo = ZenTimer;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		AA0000002 /* ZenTimerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenTimerApp.swift; sourceTree = "<group>"; };
@@ -40,14 +56,18 @@
 		AA0000031 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AA0000035 /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		AA0000037 /* Views/SplashScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/SplashScreenView.swift; sourceTree = "<group>"; };
-		C99E46552E73582500A55912 /* HelpSupportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpSupportView.swift; sourceTree = "<group>"; };
-		C99E46562E73582500A55912 /* PrivacyPolicyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPolicyView.swift; sourceTree = "<group>"; };
-		C99E46572E73582500A55912 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
-		C99E46582E73582500A55912 /* TermsOfServiceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TermsOfServiceView.swift; sourceTree = "<group>"; };
 		AA0000051 /* TimerViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerViewModelTests.swift; sourceTree = "<group>"; };
 		AA0000053 /* ZenTimerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenTimerUITests.swift; sourceTree = "<group>"; };
 		AA0000056 /* ZenTimerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ZenTimerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA0000057 /* ZenTimerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ZenTimerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C92C16042F494CBC00F5BAF8 /* TimerActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerActivityAttributes.swift; sourceTree = "<group>"; };
+		C92C16052F494CD600F5BAF8 /* ZenTimerWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenTimerWidget.swift; sourceTree = "<group>"; };
+		C92C16062F494CF800F5BAF8 /* TimerPresetsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerPresetsView.swift; sourceTree = "<group>"; };
+		C92C16072F494D0900F5BAF8 /* ZenTimerAppIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZenTimerAppIntents.swift; sourceTree = "<group>"; };
+		C99E46552E73582500A55912 /* HelpSupportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpSupportView.swift; sourceTree = "<group>"; };
+		C99E46562E73582500A55912 /* PrivacyPolicyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyPolicyView.swift; sourceTree = "<group>"; };
+		C99E46572E73582500A55912 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		C99E46582E73582500A55912 /* TermsOfServiceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TermsOfServiceView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -115,6 +135,10 @@
 				AA0000060 /* ZenTimerTests */,
 				AA0000061 /* ZenTimerUITests */,
 				AA0000018 /* Products */,
+				C92C16042F494CBC00F5BAF8 /* TimerActivityAttributes.swift */,
+				C92C16052F494CD600F5BAF8 /* ZenTimerWidget.swift */,
+				C92C16062F494CF800F5BAF8 /* TimerPresetsView.swift */,
+				C92C16072F494D0900F5BAF8 /* ZenTimerAppIntents.swift */,
 			);
 			sourceTree = "<group>";
 		};
@@ -285,23 +309,6 @@
 			targetProxy = AA0000071 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
-
-/* Begin PBXContainerItemProxy section */
-		AA0000070 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = AA0000023 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = AA0000020;
-			remoteInfo = ZenTimer;
-		};
-		AA0000071 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = AA0000023 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = AA0000020;
-			remoteInfo = ZenTimer;
-		};
-/* End PBXContainerItemProxy section */
 
 /* Begin XCBuildConfiguration section */
 		AA0000025 /* Debug */ = {

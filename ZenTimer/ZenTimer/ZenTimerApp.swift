@@ -171,3 +171,7 @@ class NotificationDelegate: NSObject, ObservableObject, UNUserNotificationCenter
         completionHandler()
     }
 }
+#Preview {
+    Text("ZenTimerApp is an App, not a View. Preview individual Views like ContentView or SplashScreenView instead.")
+}
+

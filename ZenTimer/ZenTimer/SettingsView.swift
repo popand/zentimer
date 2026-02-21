@@ -193,3 +193,8 @@ struct SimpleSettingsView: View {
         }
     }
 }
+#Preview {
+    SimpleSettingsView()
+        .environmentObject(TimerViewModel())
+}
+
